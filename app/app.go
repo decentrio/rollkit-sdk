@@ -74,11 +74,6 @@ import (
 	ibcfeekeeper "github.com/cosmos/ibc-go/v8/modules/apps/29-fee/keeper"
 	ibctransferkeeper "github.com/cosmos/ibc-go/v8/modules/apps/transfer/keeper"
 	ibckeeper "github.com/cosmos/ibc-go/v8/modules/core/keeper"
-
-	gmmodulekeeper "gm/x/gm/keeper"
-	// this line is used by starport scaffolding # stargate/app/moduleImport
-
-	"gm/docs"
 )
 
 const (
@@ -139,9 +134,6 @@ type App struct {
 	ScopedIBCTransferKeeper   capabilitykeeper.ScopedKeeper
 	ScopedICAControllerKeeper capabilitykeeper.ScopedKeeper
 	ScopedICAHostKeeper       capabilitykeeper.ScopedKeeper
-
-	GmKeeper gmmodulekeeper.Keeper
-	// this line is used by starport scaffolding # stargate/app/keeperDeclaration
 
 	// simulation manager
 	sm *module.SimulationManager
@@ -279,7 +271,6 @@ func New(
 		&app.NFTKeeper,
 		&app.GroupKeeper,
 		&app.CircuitBreakerKeeper,
-		&app.GmKeeper,
 		// this line is used by starport scaffolding # stargate/app/keeperDefinition
 	); err != nil {
 		panic(err)
@@ -435,8 +426,6 @@ func (app *App) RegisterAPIRoutes(apiSvr *api.Server, apiConfig config.APIConfig
 		panic(err)
 	}
 
-	// register app's OpenAPI routes.
-	docs.RegisterOpenAPIService(Name, apiSvr.Router)
 }
 
 // GetMaccPerms returns a copy of the module account permissions

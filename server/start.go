@@ -2,22 +2,20 @@ package server
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net"
 	"os"
 	"runtime/pprof"
-	"time"
 
 	"github.com/cometbft/cometbft/abci/server"
 	cmtcmd "github.com/cometbft/cometbft/cmd/cometbft/commands"
 	cmtcfg "github.com/cometbft/cometbft/config"
-	"github.com/cometbft/cometbft/node"
+	cometconf "github.com/cometbft/cometbft/config"
 	"github.com/cometbft/cometbft/p2p"
 	pvm "github.com/cometbft/cometbft/privval"
 	"github.com/cometbft/cometbft/proxy"
-	rpchttp "github.com/cometbft/cometbft/rpc/client/http"
-	"github.com/cometbft/cometbft/rpc/client/local"
 	cmttypes "github.com/cometbft/cometbft/types"
 	dbm "github.com/cosmos/cosmos-db"
 	"github.com/hashicorp/go-metrics"
@@ -30,6 +28,7 @@ import (
 	pruningtypes "cosmossdk.io/store/pruning/types"
 
 	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdkserver "github.com/cosmos/cosmos-sdk/server"
 	"github.com/cosmos/cosmos-sdk/server/api"
@@ -41,6 +40,12 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/mempool"
 	"github.com/cosmos/cosmos-sdk/version"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
+
+	rollconf "github.com/rollkit/rollkit/config"
+	rollnode "github.com/rollkit/rollkit/node"
+	rollrpc "github.com/rollkit/rollkit/rpc"
+
+	rollconv "github.com/rollkit/rollkit/types"
 )
 
 const (
@@ -66,7 +71,6 @@ const (
 	FlagMinRetainBlocks     = "min-retain-blocks"
 	FlagIAVLCacheSize       = "iavl-cache-size"
 	FlagDisableIAVLFastNode = "iavl-disable-fastnode"
-	FlagShutdownGrace       = "shutdown-grace"
 
 	// state sync-related flags
 	FlagStateSyncSnapshotInterval   = "state-sync.snapshot-interval"
@@ -106,13 +110,13 @@ type StartCmdOptions struct {
 
 // StartCmd runs the service passed in, either stand-alone or in-process with
 // CometBFT.
-func StartCmd(appCreator types.AppCreator) *cobra.Command {
-	return StartCmdWithOptions(appCreator, StartCmdOptions{})
+func StartCmd(appCreator types.AppCreator, defaultNodeHome string) *cobra.Command {
+	return StartCmdWithOptions(appCreator, defaultNodeHome, StartCmdOptions{})
 }
 
 // StartCmdWithOptions runs the service passed in, either stand-alone or in-process with
 // CometBFT.
-func StartCmdWithOptions(appCreator types.AppCreator, opts StartCmdOptions) *cobra.Command {
+func StartCmdWithOptions(appCreator types.AppCreator, defaultNodeHome string, opts StartCmdOptions) *cobra.Command {
 	if opts.DBOpener == nil {
 		opts.DBOpener = openDB
 	}
@@ -171,24 +175,15 @@ is performed. Note, when enabled, gRPC will also be automatically enabled.
 				serverCtx.Logger.Info("starting ABCI without CometBFT")
 			}
 
-			err = wrapCPUProfile(serverCtx, func() error {
+			return wrapCPUProfile(serverCtx, func() error {
 				return start(serverCtx, clientCtx, appCreator, withCMT, opts)
 			})
-
-			serverCtx.Logger.Debug("received quit signal")
-			graceDuration, _ := cmd.Flags().GetDuration(FlagShutdownGrace)
-			if graceDuration > 0 {
-				serverCtx.Logger.Info("graceful shutdown start", FlagShutdownGrace, graceDuration)
-				<-time.After(graceDuration)
-				serverCtx.Logger.Info("graceful shutdown complete")
-			}
-
-			return err
 		},
 	}
 
+	cmd.Flags().String(flags.FlagHome, defaultNodeHome, "The application home directory")
 	cmd.Flags().Bool(flagWithComet, true, "Run abci app embedded in-process with CometBFT")
-	cmd.Flags().String(flagAddress, "tcp://127.0.0.1:26658", "Listen address")
+	cmd.Flags().String(flagAddress, "tcp://0.0.0.0:26658", "Listen address")
 	cmd.Flags().String(flagTransport, "socket", "Transport protocol: socket, grpc")
 	cmd.Flags().String(flagTraceStore, "", "Enable KVStore tracing to an output file")
 	cmd.Flags().String(FlagMinGasPrices, "", "Minimum gas prices to accept for transactions; Any fee in a tx must meet this minimum (e.g. 0.01photino;0.0001stake)")
@@ -220,7 +215,6 @@ is performed. Note, when enabled, gRPC will also be automatically enabled.
 	cmd.Flags().Uint32(FlagStateSyncSnapshotKeepRecent, 2, "State sync snapshot to keep")
 	cmd.Flags().Bool(FlagDisableIAVLFastNode, false, "Disable fast node for IAVL tree")
 	cmd.Flags().Int(FlagMempoolMaxTxs, mempool.DefaultMaxTx, "Sets MaxTx value for the app-side mempool")
-	cmd.Flags().Duration(FlagShutdownGrace, 0*time.Second, "On Shutdown, duration to wait for resource clean up")
 
 	// support old flags name for backwards compatibility
 	cmd.Flags().SetNormalizeFunc(func(f *pflag.FlagSet, name string) pflag.NormalizedName {
@@ -233,6 +227,7 @@ is performed. Note, when enabled, gRPC will also be automatically enabled.
 
 	// add support for all CometBFT-specific command line options
 	cmtcmd.AddNodeFlags(cmd)
+	rollconf.AddFlags(cmd)
 
 	if opts.AddFlags != nil {
 		opts.AddFlags(cmd)
@@ -260,57 +255,24 @@ func start(svrCtx *sdkserver.Context, clientCtx client.Context, appCreator types
 	emitServerInfoMetrics()
 
 	if !withCmt {
-		return startStandAlone(svrCtx, svrCfg, clientCtx, app, metrics, opts)
+		return startStandAlone(svrCtx, app, opts)
 	}
 	return startInProcess(svrCtx, svrCfg, clientCtx, app, metrics, opts)
 }
 
-func startStandAlone(svrCtx *sdkserver.Context, svrCfg serverconfig.Config, clientCtx client.Context, app types.Application, metrics *telemetry.Metrics, opts StartCmdOptions) error {
+func startStandAlone(svrCtx *sdkserver.Context, app types.Application, opts StartCmdOptions) error {
 	addr := svrCtx.Viper.GetString(flagAddress)
 	transport := svrCtx.Viper.GetString(flagTransport)
 
 	cmtApp := sdkserver.NewCometABCIWrapper(app)
 	svr, err := server.NewServer(addr, transport, cmtApp)
 	if err != nil {
-		return fmt.Errorf("error creating listener: %w", err)
+		return fmt.Errorf("error creating listener: %v", err)
 	}
 
 	svr.SetLogger(servercmtlog.CometLoggerWrapper{Logger: svrCtx.Logger.With("module", "abci-server")})
 
 	g, ctx := getCtx(svrCtx, false)
-
-	// Add the tx service to the gRPC router. We only need to register this
-	// service if API or gRPC is enabled, and avoid doing so in the general
-	// case, because it spawns a new local CometBFT RPC client.
-	if svrCfg.API.Enable || svrCfg.GRPC.Enable {
-		// create tendermint client
-		// assumes the rpc listen address is where tendermint has its rpc server
-		rpcclient, err := rpchttp.New(svrCtx.Config.RPC.ListenAddress, "/websocket")
-		if err != nil {
-			return err
-		}
-		// re-assign for making the client available below
-		// do not use := to avoid shadowing clientCtx
-		clientCtx = clientCtx.WithClient(rpcclient)
-
-		// use the provided clientCtx to register the services
-		app.RegisterTxService(clientCtx)
-		app.RegisterTendermintService(clientCtx)
-		app.RegisterNodeService(clientCtx, svrCfg)
-	}
-
-	grpcSrv, clientCtx, err := startGrpcServer(ctx, g, svrCfg.GRPC, clientCtx, svrCtx, app)
-	if err != nil {
-		return err
-	}
-
-	cmtCfg := svrCtx.Config
-	home := cmtCfg.RootDir
-
-	err = startAPIServer(ctx, g, cmtCfg, svrCfg, clientCtx, svrCtx, app, home, grpcSrv, metrics)
-	if err != nil {
-		return err
-	}
 
 	g.Go(func() error {
 		if err := svr.Start(); err != nil {
@@ -322,7 +284,7 @@ func startStandAlone(svrCtx *sdkserver.Context, svrCfg serverconfig.Config, clie
 		// so we can gracefully stop the ABCI server.
 		<-ctx.Done()
 		svrCtx.Logger.Info("stopping the ABCI server...")
-		return svr.Stop()
+		return errors.Join(svr.Stop(), app.Close())
 	})
 
 	return g.Wait()
@@ -344,7 +306,7 @@ func startInProcess(svrCtx *sdkserver.Context, svrCfg serverconfig.Config, clien
 		svrCfg.GRPC.Enable = true
 	} else {
 		svrCtx.Logger.Info("starting node with ABCI CometBFT in-process")
-		tmNode, cleanupFn, err := startCmtNode(ctx, cmtCfg, app, svrCtx)
+		server, cleanupFn, err := startCmtNode(ctx, cmtCfg, app, svrCtx)
 		if err != nil {
 			return err
 		}
@@ -356,7 +318,7 @@ func startInProcess(svrCtx *sdkserver.Context, svrCfg serverconfig.Config, clien
 		if svrCfg.API.Enable || svrCfg.GRPC.Enable {
 			// Re-assign for making the client available below do not use := to avoid
 			// shadowing the clientCtx variable.
-			clientCtx = clientCtx.WithClient(local.New(tmNode))
+			clientCtx = clientCtx.WithClient(server.Client())
 
 			app.RegisterTxService(clientCtx)
 			app.RegisterTendermintService(clientCtx)
@@ -391,39 +353,78 @@ func startCmtNode(
 	cfg *cmtcfg.Config,
 	app types.Application,
 	svrCtx *sdkserver.Context,
-) (tmNode *node.Node, cleanupFn func(), err error) {
+) (server *rollrpc.Server, cleanupFn func(), err error) {
 	nodeKey, err := p2p.LoadOrGenNodeKey(cfg.NodeKeyFile())
 	if err != nil {
 		return nil, cleanupFn, err
 	}
 
+	svrCtx.Logger.Info("starting node with Rollkit in-process")
+
+	pval := pvm.LoadOrGenFilePV(cfg.PrivValidatorKeyFile(), cfg.PrivValidatorStateFile())
+
+	//keys in Rollkit format
+	p2pKey, err := rollconv.GetNodeKey(nodeKey)
+	if err != nil {
+		return nil, cleanupFn, err
+	}
+
+	signingKey, err := rollconv.GetNodeKey(&p2p.NodeKey{PrivKey: pval.Key.PrivKey})
+	if err != nil {
+		return nil, cleanupFn, err
+	}
+
+	nodeConfig := rollconf.NodeConfig{}
+	err = nodeConfig.GetViperConfig(svrCtx.Viper)
+	if err != nil {
+		return nil, cleanupFn, err
+	}
+	rollconf.GetNodeConfig(&nodeConfig, cfg)
+	err = rollconf.TranslateAddresses(&nodeConfig)
+	if err != nil {
+		return nil, cleanupFn, err
+	}
+
+	genDoc, err := getGenDocProvider(cfg)()
+	if err != nil {
+		return nil, cleanupFn, err
+	}
+	metrics := rollnode.DefaultMetricsProvider(cometconf.DefaultInstrumentationConfig())
+
 	cmtApp := sdkserver.NewCometABCIWrapper(app)
-	tmNode, err = node.NewNodeWithContext(
+	tmNode, err := rollnode.NewNode(
 		ctx,
-		cfg,
-		pvm.LoadOrGenFilePV(cfg.PrivValidatorKeyFile(), cfg.PrivValidatorStateFile()),
-		nodeKey,
+		nodeConfig,
+		p2pKey,
+		signingKey,
 		proxy.NewLocalClientCreator(cmtApp),
-		getGenDocProvider(cfg),
-		cmtcfg.DefaultDBProvider,
-		node.DefaultMetricsProvider(cfg.Instrumentation),
+		genDoc,
+		metrics,
 		servercmtlog.CometLoggerWrapper{Logger: svrCtx.Logger},
 	)
+
 	if err != nil {
-		return tmNode, cleanupFn, err
+		return nil, cleanupFn, err
+	}
+
+	server = rollrpc.NewServer(tmNode, cfg.RPC, servercmtlog.CometLoggerWrapper{Logger: svrCtx.Logger})
+	err = server.Start()
+	if err != nil {
+		return nil, cleanupFn, err
 	}
 
 	if err := tmNode.Start(); err != nil {
-		return tmNode, cleanupFn, err
+		return nil, cleanupFn, err
 	}
 
 	cleanupFn = func() {
 		if tmNode != nil && tmNode.IsRunning() {
 			_ = tmNode.Stop()
+			_ = app.Close()
 		}
 	}
 
-	return tmNode, cleanupFn, nil
+	return server, cleanupFn, nil
 }
 
 func getAndValidateConfig(svrCtx *sdkserver.Context) (serverconfig.Config, error) {
@@ -484,7 +485,7 @@ func startGrpcServer(
 		// return grpcServer as nil if gRPC is disabled
 		return nil, clientCtx, nil
 	}
-	_, _, err := net.SplitHostPort(config.Address)
+	_, port, err := net.SplitHostPort(config.Address)
 	if err != nil {
 		return nil, clientCtx, err
 	}
@@ -499,9 +500,11 @@ func startGrpcServer(
 		maxRecvMsgSize = serverconfig.DefaultGRPCMaxRecvMsgSize
 	}
 
+	grpcAddress := fmt.Sprintf("127.0.0.1:%s", port)
+
 	// if gRPC is enabled, configure gRPC client for gRPC gateway
 	grpcClient, err := grpc.Dial(
-		config.Address,
+		grpcAddress,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithDefaultCallOptions(
 			grpc.ForceCodec(codec.NewProtoCodec(clientCtx.InterfaceRegistry).GRPCCodec()),
@@ -514,7 +517,7 @@ func startGrpcServer(
 	}
 
 	clientCtx = clientCtx.WithGRPCClient(grpcClient)
-	svrCtx.Logger.Debug("gRPC client assigned to client context", "target", config.Address)
+	svrCtx.Logger.Debug("gRPC client assigned to client context", "target", grpcAddress)
 
 	grpcSrv, err := servergrpc.NewGRPCServer(clientCtx, app, config)
 	if err != nil {

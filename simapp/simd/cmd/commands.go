@@ -10,9 +10,9 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"rollkit-sdk/simapp"
+	"github.com/decentrio/rollkit-sdk/simapp"
 
-	rollkitserver "rollkit-sdk/server"
+	rollkitserver "github.com/decentrio/rollkit-sdk/server"
 
 	"cosmossdk.io/log"
 	confixcmd "cosmossdk.io/tools/confix/cmd"

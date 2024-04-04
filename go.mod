@@ -1,4 +1,4 @@
-module rollkit-sdk
+module github.com/decentrio/rollkit-sdk
 
 go 1.21.4
 

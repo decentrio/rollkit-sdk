@@ -3,9 +3,9 @@ package cmd
 import (
 	"os"
 
-	"rollkit-sdk/simapp"
+	"github.com/decentrio/rollkit-sdk/simapp"
 
-	"rollkit-sdk/simapp/params"
+	"github.com/decentrio/rollkit-sdk/simapp/params"
 
 	"cosmossdk.io/log"
 	dbm "github.com/cosmos/cosmos-db"

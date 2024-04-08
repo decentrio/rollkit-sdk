@@ -1,3 +1,3 @@
 /*
  */
-package mint
+package staking

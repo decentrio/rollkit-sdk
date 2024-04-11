@@ -1,0 +1,13 @@
+syntax = "proto3";
+package rollkitsdk.sequencer;
+
+import "amino/amino.proto";
+import "gogoproto/gogo.proto";
+
+option go_package = "rollkitsdk/x/sequencer/types";
+
+// Params defines the parameters for the module.
+message Params {
+  option (amino.name) = "rollkitsdk/x/sequencer/Params";
+  option (gogoproto.equal) = true;
+}

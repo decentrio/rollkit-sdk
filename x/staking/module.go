@@ -48,7 +48,17 @@ func NewAppModule(cdc codec.Codec, keeper keeper.Keeper, ak types.AccountKeeper,
 }
 
 func (am AppModule) EndBlock(ctx context.Context) ([]abci.ValidatorUpdate, error) {
+	_, err := am.keeper.EndBlocker(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	return []abci.ValidatorUpdate{}, nil
+}
+
+// BeginBlock returns the begin blocker for the staking module.
+func (am AppModule) BeginBlock(ctx context.Context) error {
+	return am.keeper.BeginBlocker(ctx)
 }
 
 func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, data json.RawMessage) []abci.ValidatorUpdate {

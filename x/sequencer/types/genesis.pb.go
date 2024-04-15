@@ -5,6 +5,8 @@ package types
 
 import (
 	fmt "fmt"
+	_ "github.com/cosmos/cosmos-proto"
+	types "github.com/cosmos/cosmos-sdk/codec/types"
 	_ "github.com/cosmos/cosmos-sdk/types/tx/amino"
 	_ "github.com/cosmos/gogoproto/gogoproto"
 	proto "github.com/cosmos/gogoproto/proto"
@@ -27,7 +29,8 @@ const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 // GenesisState defines the gm module's genesis state.
 type GenesisState struct {
 	// params defines all the parameters of the module.
-	Params Params `protobuf:"bytes,1,opt,name=params,proto3" json:"params"`
+	Params     Params       `protobuf:"bytes,1,opt,name=params,proto3" json:"params"`
+	Sequencers []*Sequencer `protobuf:"bytes,2,rep,name=sequencers,proto3" json:"sequencers,omitempty"`
 }
 
 func (m *GenesisState) Reset()         { *m = GenesisState{} }
@@ -70,8 +73,71 @@ func (m *GenesisState) GetParams() Params {
 	return Params{}
 }
 
+func (m *GenesisState) GetSequencers() []*Sequencer {
+	if m != nil {
+		return m.Sequencers
+	}
+	return nil
+}
+
+// Sequencer defines a sequence of instructions to be executed.
+type Sequencer struct {
+	// name is the human-readable name of the sequence.
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// consensus_pubkey is the consensus public key of the sequencer, as a Protobuf Any.
+	ConsensusPubkey *types.Any `protobuf:"bytes,2,opt,name=consensus_pubkey,json=consensusPubkey,proto3" json:"consensus_pubkey,omitempty"`
+}
+
+func (m *Sequencer) Reset()         { *m = Sequencer{} }
+func (m *Sequencer) String() string { return proto.CompactTextString(m) }
+func (*Sequencer) ProtoMessage()    {}
+func (*Sequencer) Descriptor() ([]byte, []int) {
+	return fileDescriptor_d3ea815a4d482087, []int{1}
+}
+func (m *Sequencer) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *Sequencer) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_Sequencer.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *Sequencer) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Sequencer.Merge(m, src)
+}
+func (m *Sequencer) XXX_Size() int {
+	return m.Size()
+}
+func (m *Sequencer) XXX_DiscardUnknown() {
+	xxx_messageInfo_Sequencer.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Sequencer proto.InternalMessageInfo
+
+func (m *Sequencer) GetName() string {
+	if m != nil {
+		return m.Name
+	}
+	return ""
+}
+
+func (m *Sequencer) GetConsensusPubkey() *types.Any {
+	if m != nil {
+		return m.ConsensusPubkey
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterType((*GenesisState)(nil), "rollkitsdk.sequencer.GenesisState")
+	proto.RegisterType((*Sequencer)(nil), "rollkitsdk.sequencer.Sequencer")
 }
 
 func init() {
@@ -79,20 +145,28 @@ func init() {
 }
 
 var fileDescriptor_d3ea815a4d482087 = []byte{
-	// 195 bytes of a gzipped FileDescriptorProto
+	// 336 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x52, 0x2a, 0xca, 0xcf, 0xc9,
 	0xc9, 0xce, 0x2c, 0x29, 0x4e, 0xc9, 0xd6, 0x2f, 0x4e, 0x2d, 0x2c, 0x4d, 0xcd, 0x4b, 0x4e, 0x2d,
 	0xd2, 0x4f, 0x4f, 0xcd, 0x4b, 0x2d, 0xce, 0x2c, 0xd6, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0x12,
 	0x41, 0xa8, 0xd1, 0x83, 0xab, 0x91, 0x12, 0x4c, 0xcc, 0xcd, 0xcc, 0xcb, 0xd7, 0x07, 0x93, 0x10,
-	0x85, 0x52, 0x22, 0xe9, 0xf9, 0xe9, 0xf9, 0x60, 0xa6, 0x3e, 0x88, 0x05, 0x15, 0x55, 0xc4, 0x6a,
-	0x45, 0x41, 0x62, 0x51, 0x62, 0x2e, 0xd4, 0x06, 0x25, 0x7f, 0x2e, 0x1e, 0x77, 0x88, 0x95, 0xc1,
-	0x25, 0x89, 0x25, 0xa9, 0x42, 0xf6, 0x5c, 0x6c, 0x10, 0x79, 0x09, 0x46, 0x05, 0x46, 0x0d, 0x6e,
-	0x23, 0x19, 0x3d, 0x6c, 0x4e, 0xd0, 0x0b, 0x00, 0xab, 0x71, 0xe2, 0x3c, 0x71, 0x4f, 0x9e, 0x61,
-	0xc5, 0xf3, 0x0d, 0x5a, 0x8c, 0x41, 0x50, 0x6d, 0x4e, 0x66, 0x27, 0x1e, 0xc9, 0x31, 0x5e, 0x78,
-	0x24, 0xc7, 0xf8, 0xe0, 0x91, 0x1c, 0xe3, 0x84, 0xc7, 0x72, 0x0c, 0x17, 0x1e, 0xcb, 0x31, 0xdc,
-	0x78, 0x2c, 0xc7, 0x10, 0x25, 0x83, 0xe4, 0x9a, 0x0a, 0x24, 0xf7, 0x94, 0x54, 0x16, 0xa4, 0x16,
-	0x27, 0xb1, 0x81, 0xdd, 0x63, 0x0c, 0x08, 0x00, 0x00, 0xff, 0xff, 0xb0, 0xa6, 0xda, 0xf7, 0x17,
-	0x01, 0x00, 0x00,
+	0x85, 0x52, 0x92, 0xc9, 0xf9, 0xc5, 0xb9, 0xf9, 0xc5, 0xf1, 0x60, 0x9e, 0x3e, 0x84, 0x03, 0x95,
+	0x12, 0x49, 0xcf, 0x4f, 0xcf, 0x87, 0x88, 0x83, 0x58, 0x30, 0x0d, 0xe9, 0xf9, 0xf9, 0xe9, 0x39,
+	0xa9, 0xfa, 0x60, 0x5e, 0x52, 0x69, 0x9a, 0x7e, 0x62, 0x5e, 0x25, 0x54, 0x4a, 0x11, 0xab, 0xc3,
+	0x0a, 0x12, 0x8b, 0x12, 0x73, 0xa1, 0x66, 0x2a, 0x4d, 0x60, 0xe4, 0xe2, 0x71, 0x87, 0xb8, 0x34,
+	0xb8, 0x24, 0xb1, 0x24, 0x55, 0xc8, 0x9e, 0x8b, 0x0d, 0xa2, 0x40, 0x82, 0x51, 0x81, 0x51, 0x83,
+	0xdb, 0x48, 0x46, 0x0f, 0x9b, 0xcb, 0xf5, 0x02, 0xc0, 0x6a, 0x9c, 0x38, 0x4f, 0xdc, 0x93, 0x67,
+	0x58, 0xf1, 0x7c, 0x83, 0x16, 0x63, 0x10, 0x54, 0x9b, 0x90, 0x3d, 0x17, 0x17, 0x5c, 0x59, 0xb1,
+	0x04, 0x93, 0x02, 0xb3, 0x06, 0xb7, 0x91, 0x3c, 0x76, 0x43, 0x82, 0x61, 0xac, 0x20, 0x24, 0x2d,
+	0x4a, 0x55, 0x5c, 0x9c, 0x70, 0x09, 0x21, 0x21, 0x2e, 0x96, 0xbc, 0xc4, 0xdc, 0x54, 0xb0, 0x63,
+	0x38, 0x83, 0xc0, 0x6c, 0xa1, 0x48, 0x2e, 0x81, 0xe4, 0xfc, 0xbc, 0xe2, 0xd4, 0xbc, 0xe2, 0xd2,
+	0xe2, 0xf8, 0x82, 0xd2, 0xa4, 0xec, 0xd4, 0x4a, 0x09, 0x26, 0xb0, 0x63, 0x45, 0xf4, 0x20, 0x81,
+	0xa1, 0x07, 0x0b, 0x0c, 0x3d, 0xc7, 0xbc, 0x4a, 0x27, 0x89, 0x53, 0x5b, 0x74, 0x45, 0xa0, 0x21,
+	0x99, 0x5c, 0x54, 0x59, 0x50, 0x92, 0xaf, 0x17, 0x50, 0x9a, 0xe4, 0x9d, 0x5a, 0x19, 0xc4, 0x0f,
+	0x37, 0x27, 0x00, 0x6c, 0x8c, 0x93, 0xd9, 0x89, 0x47, 0x72, 0x8c, 0x17, 0x1e, 0xc9, 0x31, 0x3e,
+	0x78, 0x24, 0xc7, 0x38, 0xe1, 0xb1, 0x1c, 0xc3, 0x85, 0xc7, 0x72, 0x0c, 0x37, 0x1e, 0xcb, 0x31,
+	0x44, 0xc9, 0x20, 0x85, 0x65, 0x05, 0x52, 0x68, 0x96, 0x54, 0x16, 0xa4, 0x16, 0x27, 0xb1, 0x81,
+	0x2d, 0x34, 0x06, 0x04, 0x00, 0x00, 0xff, 0xff, 0x2c, 0x0b, 0xce, 0xcd, 0x0b, 0x02, 0x00, 0x00,
 }
 
 func (m *GenesisState) Marshal() (dAtA []byte, err error) {
@@ -115,6 +189,20 @@ func (m *GenesisState) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if len(m.Sequencers) > 0 {
+		for iNdEx := len(m.Sequencers) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Sequencers[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintGenesis(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x12
+		}
+	}
 	{
 		size, err := m.Params.MarshalToSizedBuffer(dAtA[:i])
 		if err != nil {
@@ -125,6 +213,48 @@ func (m *GenesisState) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	}
 	i--
 	dAtA[i] = 0xa
+	return len(dAtA) - i, nil
+}
+
+func (m *Sequencer) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *Sequencer) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *Sequencer) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.ConsensusPubkey != nil {
+		{
+			size, err := m.ConsensusPubkey.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintGenesis(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Name) > 0 {
+		i -= len(m.Name)
+		copy(dAtA[i:], m.Name)
+		i = encodeVarintGenesis(dAtA, i, uint64(len(m.Name)))
+		i--
+		dAtA[i] = 0xa
+	}
 	return len(dAtA) - i, nil
 }
 
@@ -147,6 +277,29 @@ func (m *GenesisState) Size() (n int) {
 	_ = l
 	l = m.Params.Size()
 	n += 1 + l + sovGenesis(uint64(l))
+	if len(m.Sequencers) > 0 {
+		for _, e := range m.Sequencers {
+			l = e.Size()
+			n += 1 + l + sovGenesis(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *Sequencer) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Name)
+	if l > 0 {
+		n += 1 + l + sovGenesis(uint64(l))
+	}
+	if m.ConsensusPubkey != nil {
+		l = m.ConsensusPubkey.Size()
+		n += 1 + l + sovGenesis(uint64(l))
+	}
 	return n
 }
 
@@ -215,6 +368,158 @@ func (m *GenesisState) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if err := m.Params.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Sequencers", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowGenesis
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthGenesis
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthGenesis
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Sequencers = append(m.Sequencers, &Sequencer{})
+			if err := m.Sequencers[len(m.Sequencers)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipGenesis(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthGenesis
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *Sequencer) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowGenesis
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: Sequencer: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: Sequencer: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Name", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowGenesis
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthGenesis
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthGenesis
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Name = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ConsensusPubkey", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowGenesis
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthGenesis
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthGenesis
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.ConsensusPubkey == nil {
+				m.ConsensusPubkey = &types.Any{}
+			}
+			if err := m.ConsensusPubkey.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex

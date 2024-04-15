@@ -2,7 +2,9 @@ syntax = "proto3";
 package rollkitsdk.sequencer;
 
 import "amino/amino.proto";
+import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
+import "google/protobuf/any.proto";
 import "rollkitsdk/sequencer/params.proto";
 
 option go_package = "rollkitsdk/x/sequencer/types";
@@ -14,4 +16,15 @@ message GenesisState {
     (gogoproto.nullable) = false,
     (amino.dont_omitempty) = true
   ];
+
+  repeated Sequencer sequencers = 2;
+}
+
+// Sequencer defines a sequence of instructions to be executed.
+message Sequencer {
+  // name is the human-readable name of the sequence.
+  string name = 1;
+
+  // consensus_pubkey is the consensus public key of the sequencer, as a Protobuf Any.
+  google.protobuf.Any consensus_pubkey = 2 [(cosmos_proto.accepts_interface) = "cosmos.crypto.PubKey"];
 }

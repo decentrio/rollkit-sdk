@@ -106,6 +106,8 @@ import (
 
 	"github.com/decentrio/rollkit-sdk/x/sequencer"
 	sequencerkeeper "github.com/decentrio/rollkit-sdk/x/sequencer/keeper"
+	sequencertypes "github.com/decentrio/rollkit-sdk/x/sequencer/types"
+
 	rollkitstaking "github.com/decentrio/rollkit-sdk/x/staking"
 	rollkitstakingkeeper "github.com/decentrio/rollkit-sdk/x/staking/keeper"
 )
@@ -166,7 +168,7 @@ type SimApp struct {
 	NFTKeeper             nftkeeper.Keeper
 	ConsensusParamsKeeper consensusparamkeeper.Keeper
 	CircuitKeeper         circuitkeeper.Keeper
-
+	sequencerkeeper.Keeper
 	// the module manager
 	ModuleManager      *module.Manager
 	BasicModuleManager module.BasicManager
@@ -258,7 +260,7 @@ func NewSimApp(
 		minttypes.StoreKey, distrtypes.StoreKey, slashingtypes.StoreKey,
 		govtypes.StoreKey, paramstypes.StoreKey, consensusparamtypes.StoreKey, upgradetypes.StoreKey, feegrant.StoreKey,
 		evidencetypes.StoreKey, circuittypes.StoreKey,
-		authzkeeper.StoreKey, nftkeeper.StoreKey, group.StoreKey,
+		authzkeeper.StoreKey, nftkeeper.StoreKey, group.StoreKey, sequencertypes.StoreKey,
 	)
 
 	// register streaming services
@@ -477,7 +479,7 @@ func NewSimApp(
 		distrtypes.ModuleName, stakingtypes.ModuleName, slashingtypes.ModuleName, govtypes.ModuleName,
 		minttypes.ModuleName, crisistypes.ModuleName, genutiltypes.ModuleName, evidencetypes.ModuleName, authz.ModuleName,
 		feegrant.ModuleName, nft.ModuleName, group.ModuleName, paramstypes.ModuleName, upgradetypes.ModuleName,
-		vestingtypes.ModuleName, consensusparamtypes.ModuleName, circuittypes.ModuleName,
+		vestingtypes.ModuleName, consensusparamtypes.ModuleName, circuittypes.ModuleName, sequencertypes.ModuleName,
 	}
 	app.ModuleManager.SetOrderInitGenesis(genesisModuleOrder...)
 	app.ModuleManager.SetOrderExportGenesis(genesisModuleOrder...)
@@ -487,10 +489,11 @@ func NewSimApp(
 
 	app.ModuleManager.RegisterInvariants(app.CrisisKeeper)
 	app.configurator = module.NewConfigurator(app.appCodec, app.MsgServiceRouter(), app.GRPCQueryRouter())
-	// err = app.ModuleManager.RegisterServices(app.configurator)
-	// if err != nil {
-	// 	panic(err)
-	// }
+
+	err = app.ModuleManager.RegisterServices(app.configurator)
+	if err != nil {
+		panic(err)
+	}
 
 	// RegisterUpgradeHandlers is used for registering any on-chain upgrades.
 	// Make sure it's called after `app.ModuleManager` and `app.configurator` are set.

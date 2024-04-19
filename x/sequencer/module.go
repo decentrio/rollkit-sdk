@@ -3,6 +3,7 @@ package sequencer
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"cosmossdk.io/core/appmodule"
 	abci "github.com/cometbft/cometbft/abci/types"
@@ -22,6 +23,7 @@ import (
 var (
 	_ module.AppModuleBasic = AppModuleBasic{}
 	_ appmodule.AppModule   = AppModule{}
+	_ module.HasABCIGenesis = AppModule{}
 )
 
 type AppModuleBasic struct {
@@ -56,7 +58,7 @@ func (am AppModule) IsAppModule() {}
 // IsOnePerModuleType implements the depinject.OnePerModuleType interface.
 func (am AppModule) IsOnePerModuleType() {}
 
-// Name returns the sequencer module's name.
+// Name returns the sequencer module's name
 func (am AppModule) Name() string {
 	return types.ModuleName
 }
@@ -76,4 +78,26 @@ func (AppModule) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *gwrunt
 	if err := types.RegisterQueryHandlerClient(context.Background(), mux, types.NewQueryClient(clientCtx)); err != nil {
 		panic(err)
 	}
+}
+
+// DefaultGenesis returns default genesis state as raw bytes for the staking
+// module.
+func (AppModule) DefaultGenesis(cdc codec.JSONCodec) json.RawMessage {
+	return cdc.MustMarshalJSON(types.DefaultGenesisState())
+}
+
+// ExportGenesis returns the exported genesis state as raw bytes for the staking
+// module.
+func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.RawMessage {
+	return nil
+}
+
+// ValidateGenesis performs genesis state validation for the staking module.
+func (AppModule) ValidateGenesis(cdc codec.JSONCodec, config client.TxEncodingConfig, bz json.RawMessage) error {
+	var data types.GenesisState
+	if err := cdc.UnmarshalJSON(bz, &data); err != nil {
+		return fmt.Errorf("failed to unmarshal %s genesis state: %w", types.ModuleName, err)
+	}
+
+	return nil
 }

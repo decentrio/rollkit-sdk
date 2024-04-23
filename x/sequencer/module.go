@@ -17,7 +17,6 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/types/module"
-	"github.com/cosmos/cosmos-sdk/x/staking"
 )
 
 var (
@@ -27,25 +26,54 @@ var (
 )
 
 type AppModuleBasic struct {
-	staking.AppModuleBasic
+	cdc codec.Codec
 }
 
 type AppModule struct {
+	AppModuleBasic
 	keeper keeper.Keeper
 }
 
 // NewAppModule creates a new AppModule object
 func NewAppModule(cdc codec.Codec, keeper keeper.Keeper) AppModule {
 	return AppModule{
-		keeper: keeper,
+		AppModuleBasic: AppModuleBasic{cdc: cdc},
+		keeper:         keeper,
+	}
+}
+
+// Name returns the sequencer module's name.
+func (AppModuleBasic) Name() string {
+	return types.ModuleName
+}
+
+// RegisterLegacyAminoCodec registers the sequencer module's types on the given LegacyAmino codec.
+func (AppModuleBasic) RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
+	types.RegisterLegacyAminoCodec(cdc)
+}
+
+// RegisterInterfaces registers the module's interface types
+func (AppModuleBasic) RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
+	types.RegisterInterfaces(registry)
+}
+
+// TODO: add validation
+// ValidateGenesis performs genesis state validation for the sequencer module.
+func (AppModuleBasic) ValidateGenesis(cdc codec.JSONCodec, config client.TxEncodingConfig, bz json.RawMessage) error {
+	return nil
+}
+
+// RegisterGRPCGatewayRoutes registers the gRPC Gateway routes for the staking module.
+func (AppModuleBasic) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *gwruntime.ServeMux) {
+	if err := types.RegisterQueryHandlerClient(context.Background(), mux, types.NewQueryClient(clientCtx)); err != nil {
+		panic(err)
 	}
 }
 
 func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, data json.RawMessage) []abci.ValidatorUpdate {
 	var genesisState types.GenesisState
 	cdc.MustUnmarshalJSON(data, &genesisState)
-
-	return am.keeper.InitGenesis(ctx, genesisState)
+	return am.keeper.InitGenesis(ctx, &genesisState)
 }
 
 func (am AppModule) RegisterInvariants(ir sdk.InvariantRegistry) {

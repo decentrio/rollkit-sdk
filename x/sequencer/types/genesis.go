@@ -1,7 +1,7 @@
 package types
 
 // NewGenesisState creates a new GenesisState instance
-func NewGenesisState(params Params, sequencer []*Sequencer) *GenesisState {
+func NewGenesisState(params Params, sequencer []Sequencer) *GenesisState {
 	return &GenesisState{
 		Params:     params,
 		Sequencers: sequencer,
@@ -11,7 +11,7 @@ func NewGenesisState(params Params, sequencer []*Sequencer) *GenesisState {
 // DefaultGenesisState gets the raw genesis raw message for testing
 func DefaultGenesisState() *GenesisState {
 	return &GenesisState{
-		Sequencers: []*Sequencer{
+		Sequencers: []Sequencer{
 			{
 				Name:            "default",
 				ConsensusPubkey: nil,

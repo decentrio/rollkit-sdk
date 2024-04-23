@@ -16,7 +16,6 @@ func (keeper Keeper) GetSequencer(ctx sdk.Context) (seq types.Sequencer) {
 	if err != nil {
 		return types.Sequencer{}
 	}
-
 	keeper.cdc.MustUnmarshal(bz, &seq)
 	return seq
 }

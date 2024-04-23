@@ -17,7 +17,10 @@ message GenesisState {
     (amino.dont_omitempty) = true
   ];
 
-  repeated Sequencer sequencers = 2;
+  repeated Sequencer sequencers = 2 [
+    (gogoproto.nullable) = false,
+    (amino.dont_omitempty) = true
+  ];
 }
 
 // Sequencer defines a sequence of instructions to be executed.

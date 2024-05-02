@@ -19,4 +19,6 @@
 
 # Go workspace file
 go.work
+vendor
+
 restart-local.sh

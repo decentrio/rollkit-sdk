@@ -21,8 +21,8 @@ var (
 	_ module.AppModuleSimulation = AppModule{}
 	_ module.HasServices         = AppModule{}
 	_ module.HasInvariants       = AppModule{}
-	_ module.HasABCIGenesis      = AppModule{}
 	_ module.HasABCIEndBlock     = AppModule{}
+	_ module.HasGenesis          = AppModule{}
 
 	_ appmodule.AppModule       = AppModule{}
 	_ appmodule.HasBeginBlocker = AppModule{}
@@ -60,9 +60,8 @@ func (am AppModule) BeginBlock(ctx context.Context) error {
 	return am.keeper.BeginBlocker(ctx)
 }
 
-func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, data json.RawMessage) []abci.ValidatorUpdate {
+func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, data json.RawMessage) {
 	var genesisState types.GenesisState
 	cdc.MustUnmarshalJSON(data, &genesisState)
 	_ = am.keeper.InitGenesis(ctx, &genesisState)
-	return []abci.ValidatorUpdate{}
 }

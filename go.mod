@@ -17,6 +17,7 @@ require (
 	github.com/cosmos/cosmos-db v1.0.2
 	github.com/cosmos/cosmos-sdk v0.50.6
 	github.com/hashicorp/go-metrics v0.5.3
+	github.com/rollkit/cosmos-sdk-starter v0.0.0-20240503162835-473d94106462
 	github.com/rollkit/rollkit v0.13.1
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/pflag v1.0.5
@@ -145,7 +146,6 @@ require (
 	github.com/manifoldco/promptui v0.9.0 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/opencontainers/runc v1.1.7 // indirect
-	github.com/rollkit/cosmos-sdk-starter v0.0.0-20240503162835-473d94106462 // indirect
 	github.com/rollkit/go-da v0.5.0 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/ulikunitz/xz v0.5.11 // indirect

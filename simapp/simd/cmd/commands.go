@@ -12,10 +12,10 @@ import (
 
 	"github.com/decentrio/rollkit-sdk/simapp"
 
-	rollserv "github.com/rollkit/cosmos-sdk-starter/server"
-	rollconf "github.com/rollkit/rollkit/config"
 	"cosmossdk.io/log"
 	confixcmd "cosmossdk.io/tools/confix/cmd"
+	rollserv "github.com/rollkit/cosmos-sdk-starter/server"
+	rollconf "github.com/rollkit/rollkit/config"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/debug"
@@ -131,7 +131,7 @@ func initRootCmd(
 			AddFlags:            rollconf.AddFlags,
 			StartCommandHandler: rollserv.StartHandler[servertypes.Application],
 		},
-)
+	)
 
 	// add keybase, auxiliary RPC, query, genesis, and tx child commands
 	rootCmd.AddCommand(

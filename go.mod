@@ -304,5 +304,3 @@ require (
 replace github.com/prometheus/common => github.com/prometheus/common v0.45.0
 
 replace github.com/prometheus/client_golang => github.com/prometheus/client_golang v1.17.0
-
-replace github.com/rollkit/rollkit => ../rollkit

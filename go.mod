@@ -75,7 +75,6 @@ require (
 	github.com/libp2p/go-reuseport v0.4.0 // indirect
 	github.com/libp2p/go-yamux/v4 v4.0.1 // indirect
 	github.com/marten-seemann/tcp v0.0.0-20210406111302-dfbc87cc63fd // indirect
-	github.com/matttproud/golang_protobuf_extensions/v2 v2.0.0 // indirect
 	github.com/miekg/dns v1.1.58 // indirect
 	github.com/mikioh/tcpinfo v0.0.0-20190314235526-30a79bb1804b // indirect
 	github.com/mikioh/tcpopt v0.0.0-20190314235656-172688c1accc // indirect
@@ -300,7 +299,3 @@ require (
 	pgregory.net/rapid v1.1.0 // indirect; indirect\
 	sigs.k8s.io/yaml v1.4.0 // indirect
 )
-
-replace github.com/prometheus/common => github.com/prometheus/common v0.45.0
-
-replace github.com/prometheus/client_golang => github.com/prometheus/client_golang v1.17.0

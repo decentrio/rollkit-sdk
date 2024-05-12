@@ -1,5 +1,5 @@
 syntax = "proto3";
-package rollkitsdk.sequencer.module;
+package rollkit.sequencer.module;
 
 import "cosmos/app/v1alpha1/module.proto";
 

@@ -1,5 +1,5 @@
 syntax = "proto3";
-package rollkit.sequencer;
+package rollkitsdk.sequencer;
 
 import "amino/amino.proto";
 import "gogoproto/gogo.proto";
@@ -8,6 +8,6 @@ option go_package = "github.com/decentrio/rollkit-sdk/x/sequencer/types";
 
 // Params defines the parameters for the module.
 message Params {
-  option (amino.name) = "rollkit/x/sequencer/Params";
+  option (amino.name) = "rollkitsdk/x/sequencer/Params";
   option (gogoproto.equal) = true;
 }

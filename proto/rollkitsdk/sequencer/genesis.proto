@@ -1,11 +1,11 @@
 syntax = "proto3";
-package rollkit.sequencer;
+package rollkitsdk.sequencer;
 
 import "amino/amino.proto";
 import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
 import "google/protobuf/any.proto";
-import "rollkit/sequencer/params.proto";
+import "rollkitsdk/sequencer/params.proto";
 
 option go_package = "github.com/decentrio/rollkit-sdk/x/sequencer/types";
 

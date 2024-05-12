@@ -1,11 +1,11 @@
 syntax = "proto3";
-package rollkit.sequencer;
+package rollkitsdk.sequencer;
 
 import "amino/amino.proto";
 import "cosmos/base/query/v1beta1/pagination.proto";
 import "gogoproto/gogo.proto";
 import "google/api/annotations.proto";
-import "rollkit/sequencer/params.proto";
+import "rollkitsdk/sequencer/params.proto";
 
 option go_package = "github.com/decentrio/rollkit-sdk/x/sequencer/types";
 
@@ -13,7 +13,7 @@ option go_package = "github.com/decentrio/rollkit-sdk/x/sequencer/types";
 service Query {
   // Parameters queries the parameters of the module.
   rpc Params(QueryParamsRequest) returns (QueryParamsResponse) {
-    option (google.api.http).get = "/rollkit/x/sequencer/params";
+    option (google.api.http).get = "/rollkitsdk/x/sequencer/params";
   }
 }
 

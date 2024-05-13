@@ -109,6 +109,8 @@ import (
 
 	rollkitstaking "github.com/decentrio/rollkit-sdk/x/staking"
 	rollkitstakingkeeper "github.com/decentrio/rollkit-sdk/x/staking/keeper"
+
+	rollkitupgrade "github.com/decentrio/rollkit-sdk/simapp/upgrade"
 )
 
 const appName = "SimApp"
@@ -598,6 +600,23 @@ func (app *SimApp) setPostHandler() {
 	}
 
 	app.SetPostHandler(postHandler)
+}
+
+func (app SimApp) RegisterUpgradeHandlers() {
+	app.UpgradeKeeper.SetUpgradeHandler(
+		rollkitupgrade.Name,
+		rollkitupgrade.CreateUpgradeHandler(app.ModuleManager, app.configurator, app.SequencerKeeper, app.StakingKeeper.Keeper),
+	)
+
+	upgradeInfo, err := app.UpgradeKeeper.ReadUpgradeInfoFromDisk()
+	if err != nil {
+		panic(err)
+	}
+
+	if upgradeInfo.Name == rollkitupgrade.Name && !app.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
+		// configure store loader that checks if version == upgradeHeight and applies store upgrades
+		app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &rollkitupgrade.StoreUpgrades))
+	}
 }
 
 // Name returns the name of the App

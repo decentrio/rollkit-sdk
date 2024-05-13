@@ -14,4 +14,10 @@ const (
 var (
 	// Keys for store sequencer cons address
 	SequencerConsAddrKey = []byte{0x11}
+
+	// Keys for store last validator set
+	LastValidatorSetKey = []byte{0x12}
+
+	// Keys for store next sequencer change height
+	NextSequencerChangeHeight = []byte{0x13}
 )

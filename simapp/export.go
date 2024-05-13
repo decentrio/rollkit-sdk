@@ -213,7 +213,6 @@ func (app *SimApp) prepForZeroHeightGenesis(ctx sdk.Context, jailAllowedAddrs []
 	}
 
 	if err := iter.Close(); err != nil {
-		app.Logger().Error("error while closing the key-value store reverse prefix iterator: ", err)
 		return
 	}
 

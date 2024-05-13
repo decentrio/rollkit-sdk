@@ -41,7 +41,7 @@ func (keeper Keeper) SetNextSequencerChangeHeight(ctx sdk.Context, height int64)
 func (keeper Keeper) GetNextSequencerChangeHeight(ctx sdk.Context) (int64, error) {
 	store := keeper.storeService.OpenKVStore(ctx)
 	bz, err := store.Get(types.NextSequencerChangeHeight)
-	if err != nil {
+	if err != nil || bz == nil {
 		return 0, fmt.Errorf("no plan for changing sequencer")
 	}
 

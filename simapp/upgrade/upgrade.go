@@ -4,6 +4,7 @@ import (
 	"context"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sequencertypes "github.com/decentrio/rollkit-sdk/x/sequencer/types"
 
 	storetypes "cosmossdk.io/store/types"
 	upgradetypes "cosmossdk.io/x/upgrade/types"
@@ -18,7 +19,9 @@ import (
 const Name = "rollup-migrate"
 
 var StoreUpgrades = storetypes.StoreUpgrades{
-	Added:   []string{},
+	Added: []string{
+		sequencertypes.ModuleName,
+	},
 	Deleted: []string{},
 }
 

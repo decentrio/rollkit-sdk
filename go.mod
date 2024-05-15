@@ -14,7 +14,7 @@ require (
 	cosmossdk.io/x/nft v0.1.0
 	cosmossdk.io/x/upgrade v0.1.0
 	github.com/cometbft/cometbft v0.38.7
-	github.com/cometbft/cometbft-db v0.9.1 // indirect
+	github.com/cometbft/cometbft-db v0.9.1
 	github.com/cosmos/cosmos-sdk v0.50.6
 	github.com/spf13/cobra v1.8.0
 	google.golang.org/grpc v1.63.2

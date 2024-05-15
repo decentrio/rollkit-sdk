@@ -15,6 +15,7 @@ import (
 
 	"cosmossdk.io/log"
 	confixcmd "cosmossdk.io/tools/confix/cmd"
+	"github.com/decentrio/rollkit-sdk/migration"
 	"github.com/decentrio/rollkit-sdk/simapp"
 
 	"github.com/cosmos/cosmos-sdk/client"
@@ -116,6 +117,7 @@ func initRootCmd(
 		confixcmd.ConfigCommand(),
 		pruning.Cmd(newApp, simapp.DefaultNodeHome),
 		snapshot.Cmd(newApp),
+		migration.MigrateToRollkitCmd(),
 	)
 
 	server.AddCommandsWithStartCmdOptions(

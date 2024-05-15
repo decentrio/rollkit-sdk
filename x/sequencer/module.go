@@ -80,6 +80,7 @@ func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, data json.
 func (am AppModule) RegisterInvariants(ir sdk.InvariantRegistry) {
 	// am.keeper.RegisterInvariants(ir)
 }
+func (am AppModule) ConsensusVersion() uint64 { return 1 }
 
 // IsAppModule implements the appmodule.AppModule interface.
 func (am AppModule) IsAppModule() {}

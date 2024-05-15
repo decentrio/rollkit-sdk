@@ -41,7 +41,7 @@ func MigrateToRollkitCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			height := blockStore.Height()
+			height := cometBFTstate.LastBlockHeight
 			block := blockStore.LoadBlock(height)
 			rollkitCommit := rollkitCommitFromCometBFTCommit(*block.LastCommit)
 
@@ -69,8 +69,8 @@ func MigrateToRollkitCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			log.Println("Migration Successful")
 
+			log.Println("Migration completed successfully")
 			return nil
 		},
 	}

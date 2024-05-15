@@ -13,7 +13,9 @@ import (
 // TODO: testing
 func (keeper Keeper) SetSequencer(ctx sdk.Context, sequencer types.Sequencer) {
 	store := keeper.storeService.OpenKVStore(ctx)
-	store.Set(types.SequencerConsAddrKey, keeper.cdc.MustMarshal(&sequencer))
+	bz := keeper.cdc.MustMarshal(&sequencer)
+
+	store.Set(types.SequencerConsAddrKey, bz)
 }
 
 // TODO: testing
@@ -34,7 +36,7 @@ func (keeper Keeper) SetNextSequencerChangeHeight(ctx sdk.Context, height int64)
 	bz := make([]byte, 8)
 	binary.LittleEndian.PutUint64(bz, uint64(height))
 
-	store.Set(types.SequencerConsAddrKey, bz)
+	store.Set(types.NextSequencerChangeHeight, bz)
 }
 
 // TODO: testing

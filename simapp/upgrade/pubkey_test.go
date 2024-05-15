@@ -8,7 +8,9 @@ import (
 )
 
 func TestConvertPubKey(t *testing.T) {
-	pubKey, err := upgrade.GetSequencerEd25519Pubkey()
+	const SequencerConsensusPubkeyBase64 = "R+YT9Fz+w5+bCdPUW+IydtOYlTFcS7Irovxu/Xut2S4="
+
+	pubKey, err := upgrade.GetSequencerEd25519Pubkey(SequencerConsensusPubkeyBase64)
 	require.NoError(t, err)
-	require.Equal(t, pubKey.Address().String(), "E49ADA38175BA34DD0AEF81D531E51C0B110E817")
+	require.Equal(t, pubKey.Address().String(), "DCA26A9DCC0380A05B17352EB3036392F37AFB38")
 }

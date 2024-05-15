@@ -16,7 +16,7 @@ func (k Keeper) MigrateFromSoveregin(ctx sdk.Context, sequencer types.Sequencer)
 }
 
 // ChangeoverToConsumer includes the logic that needs to execute during the process of a
-// standalone to rollup changeover. This method constructs validator updates
+// cometBFT chain to rollup changeover. This method constructs validator updates
 // that will be given to tendermint, which allows the consumer chain to
 // start using the provider valset, while the standalone valset is given zero voting power where appropriate.
 func (k Keeper) ChangeoverToRollup(ctx sdk.Context, lastValidatorSet []stakingtypes.Validator) (initialValUpdates []abci.ValidatorUpdate, err error) {
@@ -31,8 +31,12 @@ func (k Keeper) ChangeoverToRollup(ctx sdk.Context, lastValidatorSet []stakingty
 	}
 
 	for _, val := range lastValidatorSet {
-		zeroPowerUpdate := val.ABCIValidatorUpdateZero()
-		initialValUpdates = append(initialValUpdates, zeroPowerUpdate)
+		powerUpdate := val.ABCIValidatorUpdateZero()
+		if val.ConsensusPubkey == seq.ConsensusPubkey {
+			// If the validator is the sequencer, give it voting power
+			powerUpdate.Power = 1
+		}
+		initialValUpdates = append(initialValUpdates, powerUpdate)
 	}
 
 	LastValidatorSet = nil

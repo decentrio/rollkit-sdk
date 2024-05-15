@@ -9,13 +9,14 @@ import (
 
 func (k Keeper) InitGenesis(ctx sdk.Context, data *types.GenesisState) []abci.ValidatorUpdate {
 	var seq types.Sequencer
-	if data.Sequencers == nil {
-		seq = k.GetSequencer(ctx)
-	} else {
-		// Set the initial sequence
-		k.SetSequencer(ctx, data.Sequencers[0])
-		seq = k.GetSequencer(ctx)
+	if len(data.Sequencers) == 0 {
+		return []abci.ValidatorUpdate{}
 	}
+
+	// Set the initial sequence
+	k.SetSequencer(ctx, data.Sequencers[0])
+	seq = k.GetSequencer(ctx)
+
 	if seq == (types.Sequencer{}) {
 		panic("Sequencer not set")
 	}

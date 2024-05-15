@@ -60,7 +60,6 @@ import (
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	"github.com/cosmos/cosmos-sdk/x/auth/posthandler"
 	authsims "github.com/cosmos/cosmos-sdk/x/auth/simulation"
-	"github.com/cosmos/cosmos-sdk/x/auth/tx"
 	authtx "github.com/cosmos/cosmos-sdk/x/auth/tx"
 	txmodule "github.com/cosmos/cosmos-sdk/x/auth/tx/config"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -110,6 +109,8 @@ import (
 
 	rollkitstaking "github.com/decentrio/rollkit-sdk/x/staking"
 	rollkitstakingkeeper "github.com/decentrio/rollkit-sdk/x/staking/keeper"
+
+	rollkitupgrade "github.com/decentrio/rollkit-sdk/simapp/upgrade"
 )
 
 const appName = "SimApp"
@@ -211,7 +212,7 @@ func NewSimApp(
 	})
 	appCodec := codec.NewProtoCodec(interfaceRegistry)
 	legacyAmino := codec.NewLegacyAmino()
-	txConfig := tx.NewTxConfig(appCodec, tx.DefaultSignModes)
+	txConfig := authtx.NewTxConfig(appCodec, authtx.DefaultSignModes)
 
 	std.RegisterLegacyAminoCodec(legacyAmino)
 	std.RegisterInterfaces(interfaceRegistry)
@@ -298,12 +299,12 @@ func NewSimApp(
 	)
 
 	// optional: enable sign mode textual by overwriting the default tx config (after setting the bank keeper)
-	enabledSignModes := append(tx.DefaultSignModes, sigtypes.SignMode_SIGN_MODE_TEXTUAL)
-	txConfigOpts := tx.ConfigOptions{
+	enabledSignModes := append(authtx.DefaultSignModes, sigtypes.SignMode_SIGN_MODE_TEXTUAL)
+	txConfigOpts := authtx.ConfigOptions{
 		EnabledSignModes:           enabledSignModes,
 		TextualCoinMetadataQueryFn: txmodule.NewBankKeeperCoinMetadataQueryFn(app.BankKeeper),
 	}
-	txConfig, err := tx.NewTxConfigWithOptions(
+	txConfig, err := authtx.NewTxConfigWithOptions(
 		appCodec,
 		txConfigOpts,
 	)
@@ -461,6 +462,7 @@ func NewSimApp(
 		stakingtypes.ModuleName,
 		genutiltypes.ModuleName,
 		authz.ModuleName,
+		sequencertypes.ModuleName,
 	)
 	app.ModuleManager.SetOrderEndBlockers(
 		crisistypes.ModuleName,
@@ -469,6 +471,7 @@ func NewSimApp(
 		genutiltypes.ModuleName,
 		feegrant.ModuleName,
 		group.ModuleName,
+		sequencertypes.ModuleName,
 	)
 
 	// NOTE: The genutils module must occur after staking so that pools are
@@ -599,6 +602,23 @@ func (app *SimApp) setPostHandler() {
 	}
 
 	app.SetPostHandler(postHandler)
+}
+
+func (app SimApp) RegisterUpgradeHandlers() {
+	app.UpgradeKeeper.SetUpgradeHandler(
+		rollkitupgrade.Name,
+		rollkitupgrade.CreateUpgradeHandler(app.ModuleManager, app.configurator, app.SequencerKeeper, app.StakingKeeper.Keeper),
+	)
+
+	upgradeInfo, err := app.UpgradeKeeper.ReadUpgradeInfoFromDisk()
+	if err != nil {
+		panic(err)
+	}
+
+	if upgradeInfo.Name == rollkitupgrade.Name && !app.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
+		// configure store loader that checks if version == upgradeHeight and applies store upgrades
+		app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &rollkitupgrade.StoreUpgrades))
+	}
 }
 
 // Name returns the name of the App

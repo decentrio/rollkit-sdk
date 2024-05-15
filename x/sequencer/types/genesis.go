@@ -11,12 +11,6 @@ func NewGenesisState(params Params, sequencer []Sequencer) *GenesisState {
 // DefaultGenesisState gets the raw genesis raw message for testing
 func DefaultGenesisState() *GenesisState {
 	return &GenesisState{
-		Sequencers: []Sequencer{
-			{
-				Name:            "default",
-				ConsensusPubkey: nil,
-			},
-		},
-		Params: Params{},
+		Sequencers: []Sequencer{},
 	}
 }

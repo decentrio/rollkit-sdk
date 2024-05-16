@@ -23,7 +23,7 @@ New usecases for staking module:
 
 - Staking protocol: delegation/redelegation/undelegation...
 - Work with government module on proposal tallying
-- Work with distribtion module on allocating
+- Work with distribtion module on allocating staking rewards
   
 For these usecases, we make the following changes to the module:
 

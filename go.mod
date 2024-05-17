@@ -304,6 +304,6 @@ require (
 )
 
 replace (
-	github.com/rollkit/rollkit => ../rollkit
+	github.com/rollkit/rollkit => github.com/decentrio/rollkit v0.0.0-20240516071120-d40857416a55
 	github.com/syndtr/goleveldb => github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
 )

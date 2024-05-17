@@ -32,9 +32,8 @@ func (k Keeper) ChangeoverToRollup(ctx sdk.Context, lastValidatorSet []stakingty
 
 	for _, val := range lastValidatorSet {
 		powerUpdate := val.ABCIValidatorUpdateZero()
-		if val.ConsensusPubkey == seq.ConsensusPubkey {
-			// If the validator is the sequencer, give it voting power
-			powerUpdate.Power = 1
+		if val.ConsensusPubkey.Equal(seq.ConsensusPubkey) {
+			continue
 		}
 		initialValUpdates = append(initialValUpdates, powerUpdate)
 	}

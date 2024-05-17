@@ -27,7 +27,7 @@ var StoreUpgrades = storetypes.StoreUpgrades{
 
 func CreateUpgradeHandler(mm *module.Manager, configurator module.Configurator, seqKeeper sequencerkeeper.Keeper, sk stakingkeeper.Keeper) upgradetypes.UpgradeHandler {
 	return func(ctx context.Context, plan upgradetypes.Plan, fromVM module.VersionMap) (module.VersionMap, error) {
-		seqPubkey := "R+YT9Fz+w5+bCdPUW+IydtOYlTFcS7Irovxu/Xut2S4="
+		seqPubkey := "J3ZVpvQv18IveVGkRuW+Yog9R/7E4gTWLzWIRiOw9Zk="
 
 		sdkCtx := sdk.UnwrapSDKContext(ctx)
 		// get last validator set

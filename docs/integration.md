@@ -62,3 +62,4 @@ This guide will teach you how to integrate RappDK to your cometBFT chain.
 
 ## Configuring and adding sequencer module
 
+In this step, you should add sequencer module to your `app.go` like other normal module in cosmos-SDK. 

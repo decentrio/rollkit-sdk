@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/decentrio/rollkit-sdk/simapp/simd/cmd"
-
 	"github.com/decentrio/rollkit-sdk/simapp"
+	"github.com/decentrio/rollkit-sdk/simapp/simd/cmd"
 
 	svrcmd "github.com/cosmos/cosmos-sdk/server/cmd"
 )

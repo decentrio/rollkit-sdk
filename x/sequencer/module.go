@@ -20,9 +20,10 @@ import (
 )
 
 var (
-	_ module.AppModuleBasic = AppModuleBasic{}
-	_ appmodule.AppModule   = AppModule{}
-	_ module.HasABCIGenesis = AppModule{}
+	_ module.AppModuleBasic  = AppModuleBasic{}
+	_ appmodule.AppModule    = AppModule{}
+	_ module.HasABCIGenesis  = AppModule{}
+	_ module.HasABCIEndBlock = AppModule{}
 )
 
 type AppModuleBasic struct {
@@ -73,8 +74,18 @@ func (AppModuleBasic) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *g
 func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, data json.RawMessage) []abci.ValidatorUpdate {
 	var genesisState types.GenesisState
 	cdc.MustUnmarshalJSON(data, &genesisState)
-	fmt.Println("InitGenesis")
 	return am.keeper.InitGenesis(ctx, &genesisState)
+}
+
+// EndBlock implements the AppModule interface
+func (am AppModule) EndBlock(ctx context.Context) ([]abci.ValidatorUpdate, error) {
+	sdkCtx := sdk.UnwrapSDKContext(ctx)
+	nextChangeSequencerHeight, err := am.keeper.GetNextSequencerChangeHeight(sdkCtx)
+	if sdkCtx.BlockHeight() != nextChangeSequencerHeight || err != nil {
+		return []abci.ValidatorUpdate{}, nil
+	}
+
+	return am.keeper.ChangeoverToRollup(sdkCtx, keeper.LastValidatorSet)
 }
 
 func (am AppModule) RegisterInvariants(ir sdk.InvariantRegistry) {

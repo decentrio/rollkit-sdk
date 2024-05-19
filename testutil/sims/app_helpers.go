@@ -8,6 +8,7 @@ import (
 	// cmtjson "github.com/cometbft/cometbft/libs/json"
 	cmtproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	cmttypes "github.com/cometbft/cometbft/types"
+
 	// dbm "github.com/cosmos/cosmos-db"
 
 	// coreheader "cosmossdk.io/core/header"
@@ -17,6 +18,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
+
 	// "github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	// "github.com/cosmos/cosmos-sdk/runtime"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
@@ -25,6 +27,7 @@ import (
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	sequencertypes "github.com/decentrio/rollkit-sdk/x/sequencer/types"
 )
 
 const DefaultGenTxGas = 10000000
@@ -55,8 +58,8 @@ func GenesisStateWithValSet(
 	authGenesis := authtypes.NewGenesisState(authtypes.DefaultParams(), genAccs)
 	genesisState[authtypes.ModuleName] = codec.MustMarshalJSON(authGenesis)
 	validators := make([]stakingtypes.Validator, 0, len(valSet.Validators))
-
-	for _, val := range valSet.Validators {
+	sequensers := make([]sequencertypes.Sequencer, 0, len(valSet.Validators))
+	for id, val := range valSet.Validators {
 		pk, err := cryptocodec.FromCmtPubKeyInterface(val.PubKey)
 		if err != nil {
 			return nil, fmt.Errorf("failed to convert pubkey: %w", err)
@@ -68,13 +71,22 @@ func GenesisStateWithValSet(
 		}
 
 		validator := stakingtypes.Validator{
-			OperatorAddress:   sdk.ValAddress(val.Address).String(),
-			ConsensusPubkey:   pkAny,
-			Status: stakingtypes.Unbonded,
+			OperatorAddress: sdk.ValAddress(val.Address).String(),
+			ConsensusPubkey: pkAny,
+			Status:          stakingtypes.Unbonded,
 		}
+		sequenser := sequencertypes.Sequencer{
+			Name:            fmt.Sprintf("sequenser_%s", id),
+			ConsensusPubkey: pkAny,
+		}
+
 		validators = append(validators, validator)
+		sequensers = append(sequensers, sequenser)
 
 	}
+	// set sequenser genesis state
+	sequencerGenesis := sequencertypes.NewGenesisState(sequencertypes.DefaultGenesisState().Params, sequensers)
+	genesisState[sequencertypes.ModuleName] = codec.MustMarshalJSON(sequencerGenesis)
 
 	// set validators
 	stakingGenesis := stakingtypes.NewGenesisState(stakingtypes.DefaultParams(), validators, []stakingtypes.Delegation{})

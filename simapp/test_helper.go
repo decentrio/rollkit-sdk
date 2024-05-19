@@ -15,11 +15,12 @@ import (
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	"github.com/cosmos/cosmos-sdk/server"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
-	"github.com/cosmos/cosmos-sdk/testutil/mock"
+	//"github.com/cosmos/cosmos-sdk/testutil/mock"
 	simtestutil "github.com/decentrio/rollkit-sdk/testutil/sims"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
 )
 
 // SetupOptions defines arguments that are passed into `Simapp` constructor.
@@ -46,9 +47,8 @@ func setup(withGenesis bool, invCheckPeriod uint) (*SimApp, GenesisState) {
 // NewSimappWithCustomOptions initializes a new SimApp with custom options.
 func NewSimappWithCustomOptions(t *testing.T, isCheckTx bool, options SetupOptions) *SimApp {
 	t.Helper()
-
-	privVal := mock.NewPV()
-	pubKey, err := privVal.GetPubKey()
+	privVal := secp256k1.GenPrivKey().PubKey()
+	pubKey, err := cryptocodec.ToCmtPubKeyInterface(privVal)
 	require.NoError(t, err)
 	// create validator set with single validator
 	validator := cmttypes.NewValidator(pubKey, 1)

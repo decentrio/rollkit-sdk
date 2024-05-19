@@ -16,6 +16,7 @@ require (
 	github.com/cometbft/cometbft v0.38.7
 	github.com/cosmos/cosmos-db v1.0.2
 	github.com/cosmos/cosmos-sdk v0.50.6
+	github.com/golang/mock v1.6.0
 	github.com/hashicorp/go-metrics v0.5.3
 	github.com/rollkit/cosmos-sdk-starter v0.0.0-20240503162835-473d94106462
 	github.com/rollkit/rollkit v0.13.1
@@ -131,7 +132,6 @@ require (
 	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
-	github.com/golang/mock v1.6.0 // indirect
 	github.com/google/s2a-go v0.1.7 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.2 // indirect
@@ -165,10 +165,10 @@ require (
 	cosmossdk.io/api v0.7.4
 	cosmossdk.io/collections v0.4.0 // indirect
 	cosmossdk.io/core v0.11.0
-	cosmossdk.io/depinject v1.0.0-alpha.4 // indirect
+	cosmossdk.io/depinject v1.0.0-alpha.4
 	cosmossdk.io/errors v1.0.1
 	cosmossdk.io/log v1.3.1
-	cosmossdk.io/math v1.3.0 // indirect
+	cosmossdk.io/math v1.3.0
 	cosmossdk.io/x/tx v0.13.2
 	filippo.io/edwards25519 v1.0.0 // indirect
 	github.com/99designs/go-keychain v0.0.0-20191008050251-8e49817e8af4 // indirect

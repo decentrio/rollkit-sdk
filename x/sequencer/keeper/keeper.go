@@ -1,11 +1,12 @@
 package keeper
 
 import (
-	"cosmossdk.io/log"
 	"cosmossdk.io/collections"
 	storetypes "cosmossdk.io/core/store"
+	"cosmossdk.io/log"
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	"github.com/decentrio/rollkit-sdk/x/sequencer/types"
 )
 

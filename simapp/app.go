@@ -738,6 +738,10 @@ func (app *SimApp) RegisterNodeService(clientCtx client.Context, cfg config.Conf
 	nodeservice.RegisterNodeService(clientCtx, app.GRPCQueryRouter(), cfg)
 }
 
+func (app *SimApp) DefaultGenesisState(cdc codec.JSONCodec) map[string]json.RawMessage {
+	return app.BasicModuleManager.DefaultGenesis(cdc)
+}
+
 // GetMaccPerms returns a copy of the module account permissions
 //
 // NOTE: This is solely to be used for testing purposes.

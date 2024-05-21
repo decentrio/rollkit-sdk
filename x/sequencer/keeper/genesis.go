@@ -20,7 +20,6 @@ func (k Keeper) InitGenesis(ctx sdk.Context, data *types.GenesisState) []abci.Va
 	}
 
 	seq = k.GetSequencer(ctx)
-
 	if seq == (types.Sequencer{}) {
 		panic("Sequencer not set")
 	}

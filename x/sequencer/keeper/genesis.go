@@ -14,7 +14,11 @@ func (k Keeper) InitGenesis(ctx sdk.Context, data *types.GenesisState) []abci.Va
 	}
 
 	// Set the initial sequence
-	k.SetSequencer(ctx, data.Sequencers[0])
+	err := k.Sequencer.Set(ctx, data.Sequencers[0])
+	if err != nil {
+		panic(err)
+	}
+
 	seq = k.GetSequencer(ctx)
 
 	if seq == (types.Sequencer{}) {

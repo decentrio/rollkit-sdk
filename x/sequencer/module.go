@@ -80,7 +80,7 @@ func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, data json.
 // EndBlock implements the AppModule interface
 func (am AppModule) EndBlock(ctx context.Context) ([]abci.ValidatorUpdate, error) {
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	nextChangeSequencerHeight, err := am.keeper.GetNextSequencerChangeHeight(sdkCtx)
+	nextChangeSequencerHeight, err := am.keeper.NextSequencerChangeHeight.Get(ctx)
 	if sdkCtx.BlockHeight() != nextChangeSequencerHeight || err != nil {
 		return []abci.ValidatorUpdate{}, nil
 	}

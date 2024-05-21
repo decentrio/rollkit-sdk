@@ -58,7 +58,7 @@ func (k Keeper) Logger(ctx sdk.Context) log.Logger {
 	return ctx.Logger().With("module", "x/"+types.ModuleName)
 }
 
-func (keeper Keeper) GetSequencer(ctx sdk.Context) (seq types.Sequencer) {
+func (keeper Keeper) GetSequencer(ctx sdk.Context) types.Sequencer {
 	seq, err := keeper.Sequencer.Get(ctx)
 	if err != nil {
 		return types.Sequencer{}

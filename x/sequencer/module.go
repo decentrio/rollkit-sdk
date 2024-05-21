@@ -22,6 +22,7 @@ import (
 var (
 	_ module.AppModuleBasic  = AppModuleBasic{}
 	_ appmodule.AppModule    = AppModule{}
+	_ module.HasServices     = AppModule{}
 	_ module.HasABCIGenesis  = AppModule{}
 	_ module.HasABCIEndBlock = AppModule{}
 )
@@ -111,6 +112,11 @@ func (AppModule) RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 // RegisterInterfaces registers the module's interface types
 func (AppModule) RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 	types.RegisterInterfaces(registry)
+}
+
+// RegisterServices registers module services.
+func (am AppModule) RegisterServices(cfg module.Configurator) {
+	types.RegisterMsgServer(cfg.MsgServer(), keeper.NewMsgServerImpl(am.keeper))
 }
 
 // RegisterGRPCGatewayRoutes registers the gRPC Gateway routes for the staking module.

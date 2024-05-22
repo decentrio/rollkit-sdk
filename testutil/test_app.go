@@ -89,7 +89,7 @@ func SetupWithChainId(t *testing.T, chainId string) *simapp.SimApp {
 	stateBytes, err := json.MarshalIndent(genesisState, "", " ")
 	require.NoError(t, err)
 	// init chain will set the validator set and initialize the genesis accounts
-	app.InitChain(
+	_, err = app.InitChain(
 		&abci.RequestInitChain{
 			Time:            time.Time{},
 			ChainId:         chainId,
@@ -101,6 +101,7 @@ func SetupWithChainId(t *testing.T, chainId string) *simapp.SimApp {
 			InitialHeight: 0,
 		},
 	)
+	require.NoError(t, err)
 
 	return app
 }

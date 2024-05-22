@@ -54,7 +54,10 @@ func CreateUpgradeHandler(mm *module.Manager, configurator module.Configurator, 
 		}
 
 		sequencerkeeper.LastValidatorSet = validatorSet
-		seqKeeper.NextSequencerChangeHeight.Set(sdkCtx, sdkCtx.BlockHeight())
+		err = seqKeeper.NextSequencerChangeHeight.Set(sdkCtx, sdkCtx.BlockHeight())
+		if err != nil {
+			return nil, err
+		}
 
 		return mm.RunMigrations(ctx, configurator, fromVM)
 	}

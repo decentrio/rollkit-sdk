@@ -23,6 +23,7 @@ func NewTestInterfaceRegistry() codectypes.InterfaceRegistry {
 	)
 	return registry
 }
+
 func TestSequencerInitGenesis(t *testing.T) {
 	app := testutil.SetupWithChainId(t, testutil.TestChainID)
 	ctx := app.BaseApp.NewContext(false).WithChainID(testutil.TestChainID).WithBlockTime(time.Now().UTC()).WithBlockHeight(1)

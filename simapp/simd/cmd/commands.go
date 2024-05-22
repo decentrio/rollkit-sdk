@@ -257,7 +257,11 @@ var tempDir = func() string {
 	if err != nil {
 		dir = simapp.DefaultNodeHome
 	}
-	defer os.RemoveAll(dir)
+	defer func() {
+		if err := os.RemoveAll(dir); err != nil {
+			panic(err)
+		}
+	}()
 
 	return dir
 }

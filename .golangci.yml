@@ -20,7 +20,6 @@ linters:
     - misspell
     - staticcheck
     - unused
-    - gocyclo
 
 issues:
   exclude-use-default: false

@@ -10,9 +10,9 @@ import (
 
 var LastValidatorSet []stakingtypes.Validator
 
-func (k Keeper) MigrateFromSoveregin(ctx sdk.Context, sequencer types.Sequencer) {
-	// Migrate state from soveregin chain
-	k.Sequencer.Set(ctx, sequencer)
+func (k Keeper) MigrateFromSoveregin(ctx sdk.Context, sequencer types.Sequencer) error {
+	// Migrate state from sovereign chain
+	return k.Sequencer.Set(ctx, sequencer)
 }
 
 // ChangeoverToConsumer includes the logic that needs to execute during the process of a

@@ -31,8 +31,14 @@ func (k msgServer) ChangeSequencers(goCtx context.Context, msg *types.MsgChangeS
 
 	if len(msg.Sequencers) != 0 {
 		newSequencer := msg.Sequencers[0]
-		k.Sequencer.Set(ctx, newSequencer)
-		k.NextSequencerChangeHeight.Set(ctx, ctx.BlockHeight())
+		err := k.Sequencer.Set(ctx, newSequencer)
+		if err != nil {
+			return nil, err
+		}
+		err = k.NextSequencerChangeHeight.Set(ctx, ctx.BlockHeight())
+		if err != nil {
+			return nil, err
+		}
 	}
 	return &types.MsgChangeSequencersResponse{}, nil
 }
@@ -47,6 +53,6 @@ func (k msgServer) UpdateParams(goCtx context.Context, msg *types.MsgUpdateParam
 	if err := k.Params.Set(ctx, msg.Params); err != nil {
 		return nil, err
 	}
-	
+
 	return &types.MsgUpdateParamsResponse{}, nil
 }

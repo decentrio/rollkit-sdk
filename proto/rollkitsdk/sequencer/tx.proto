@@ -52,9 +52,10 @@ message MsgChangeSequencers {
   // authority is the address that controls the module (defaults to x/gov unless
   // overwritten).
   string authority = 1 [ (cosmos_proto.scalar) = "cosmos.AddressString" ];
-
+  // block height that trigger the change sequencer
+  uint64 block_height = 2;
   // sequencers is the list pubkey that will become new sequencers.
-  repeated Sequencer sequencers = 2
+  repeated Sequencer sequencers = 3
       [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
 }
 

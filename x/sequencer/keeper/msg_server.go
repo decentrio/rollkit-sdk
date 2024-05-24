@@ -29,13 +29,13 @@ func (k msgServer) ChangeSequencers(goCtx context.Context, msg *types.MsgChangeS
 
 	ctx := sdk.UnwrapSDKContext(goCtx)
 
-	if len(msg.Sequencers) != 0 {
+	if len(msg.Sequencers) == 1 {
 		newSequencer := msg.Sequencers[0]
 		err := k.Sequencer.Set(ctx, newSequencer)
 		if err != nil {
 			return nil, err
 		}
-		err = k.NextSequencerChangeHeight.Set(ctx, ctx.BlockHeight())
+		err = k.NextSequencerChangeHeight.Set(ctx, int64(msg.BlockHeight))
 		if err != nil {
 			return nil, err
 		}

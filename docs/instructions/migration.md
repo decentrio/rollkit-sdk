@@ -1,3 +1,7 @@
+---
+parent: Instructions
+---
+
 # Migration from CometBFT chain to Rollup
 
 ## Overview

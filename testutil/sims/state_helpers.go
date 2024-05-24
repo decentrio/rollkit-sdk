@@ -196,47 +196,17 @@ func AppStateRandomizedFn(
 	appParams simtypes.AppParams,
 	genesisState map[string]json.RawMessage,
 ) (json.RawMessage, []simtypes.Account) {
-	numAccs := int64(len(accs))
-	// generate a random amount of initial stake coins and a random initial
-	// number of bonded accounts
-	var (
-		numInitiallyBonded int64
-		initialStake       math.Int
-	)
-	appParams.GetOrGenerate(
-		StakePerAccount, &initialStake, r,
-		func(r *rand.Rand) { initialStake = math.NewInt(r.Int63n(1e12)) },
-	)
-	appParams.GetOrGenerate(
-		InitiallyBondedValidators, &numInitiallyBonded, r,
-		func(r *rand.Rand) { numInitiallyBonded = int64(r.Intn(300)) },
-	)
-
-	if numInitiallyBonded > numAccs {
-		numInitiallyBonded = numAccs
-	}
-
-	fmt.Printf(
-		`Selected randomly generated parameters for simulated genesis:
-{
-  stake_per_account: "%d",
-  initially_bonded_validators: "%d"
-}
-`, initialStake.Uint64(), numInitiallyBonded,
-	)
-
 	simState := &module.SimulationState{
 		AppParams:    appParams,
 		Cdc:          cdc,
 		Rand:         r,
 		GenState:     genesisState,
 		Accounts:     accs,
-		InitialStake: initialStake,
-		NumBonded:    numInitiallyBonded,
+		InitialStake: math.ZeroInt(),
+		NumBonded:    int64(0),
 		BondDenom:    sdk.DefaultBondDenom,
 		GenTimestamp: genesisTimestamp,
 	}
-
 	simManager.GenerateGenesisStates(simState)
 
 	appState, err := json.Marshal(genesisState)

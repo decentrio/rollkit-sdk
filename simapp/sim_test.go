@@ -24,13 +24,16 @@ import (
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/server"
-	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
+	"github.com/cosmos/cosmos-sdk/types/module"
 	simtypes "github.com/cosmos/cosmos-sdk/types/simulation"
+	"github.com/cosmos/cosmos-sdk/x/auth"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	authzkeeper "github.com/cosmos/cosmos-sdk/x/authz/keeper"
 	"github.com/cosmos/cosmos-sdk/x/simulation"
 	simcli "github.com/cosmos/cosmos-sdk/x/simulation/client/cli"
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	simtestutil "github.com/decentrio/rollkit-sdk/testutil/sims"
 )
 
 // SimAppChainID hardcoded chainID for simulation
@@ -60,7 +63,7 @@ func TestFullAppSimulation(t *testing.T) {
 	config := simcli.NewConfigFromFlags()
 	config.ChainID = SimAppChainID
 
-	db, dir, logger, skip, err := simtestutil.SetupSimulation(config, "leveldb-app-sim", "Simulation", simcli.FlagVerboseValue, true) // simcli.FlagEnabledValue)
+	db, dir, logger, skip, err := simtestutil.SetupSimulation(config, "leveldb-app-sim", "Simulation", simcli.FlagVerboseValue, simcli.FlagEnabledValue)
 	if skip {
 		t.Skip("skipping application simulation")
 	}
@@ -76,10 +79,8 @@ func TestFullAppSimulation(t *testing.T) {
 	appOptions[server.FlagInvCheckPeriod] = simcli.FlagPeriodValue
 
 	app := NewSimApp(logger, db, nil, true, appOptions, fauxMerkleModeOpt, baseapp.SetChainID(SimAppChainID))
-	ctxA := app.NewContextLegacy(true, cmtproto.Header{Height: app.LastBlockHeight()})
 	require.Equal(t, "SimApp", app.Name())
-	vals, _ := app.StakingKeeper.GetAllValidators(ctxA)
-	fmt.Print("check amount of validators: ", len(vals))
+
 	// run randomized simulation
 	_, simParams, simErr := simulation.SimulateFromSeed(
 		t,
@@ -365,16 +366,14 @@ func TestAppStateDeterminism(t *testing.T) {
 			db := dbm.NewMemDB()
 			app := NewSimApp(logger, db, nil, true, appOptions, interBlockCacheOpt(), baseapp.SetChainID(SimAppChainID))
 
-			ctxA := app.NewContextLegacy(true, cmtproto.Header{Height: app.LastBlockHeight()})
-			require.Equal(t, "SimApp", app.Name())
-			vals, _ := app.StakingKeeper.GetAllValidators(ctxA)
-			fmt.Print("check amount of validators: ", len(vals))
-
 			fmt.Printf(
 				"running non-determinism simulation; seed %d: %d/%d, attempt: %d/%d\n",
 				config.Seed, i+1, numSeeds, j+1, numTimesToRunPerSeed,
 			)
-
+			overrideModules := map[string]module.AppModuleSimulation{
+				authtypes.ModuleName: auth.NewAppModule(app.appCodec, app.AccountKeeper, RandomGenesisAccounts, app.GetSubspace(authtypes.ModuleName)),
+			}
+			app.sm = module.NewSimulationManagerFromAppModules(app.ModuleManager.Modules, overrideModules)
 			_, _, err := simulation.SimulateFromSeed(
 				t,
 				os.Stdout,
@@ -387,8 +386,7 @@ func TestAppStateDeterminism(t *testing.T) {
 				app.AppCodec(),
 			)
 			require.NoError(t, err)
-			vals, _ = app.StakingKeeper.GetAllValidators(ctxA)
-			fmt.Print("check amount of validators after: ", len(vals))
+
 			if config.Commit {
 				simtestutil.PrintStats(db)
 			}

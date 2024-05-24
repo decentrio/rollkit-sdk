@@ -34,6 +34,7 @@ func TestStore(t *testing.T) {
 		Name:            "test sequence",
 		ConsensusPubkey: pkAny1,
 	})
+	require.NoError(t, err)
 
 	newSequencer, err := sequencerKeeper.Sequencer.Get(ctx)
 	require.NoError(t, err)
@@ -51,6 +52,8 @@ func TestStore(t *testing.T) {
 		Name:            "test sequence",
 		ConsensusPubkey: anyAnimal,
 	})
+	require.NoError(t, err)
+
 	_, err = sequencerKeeper.Sequencer.Get(ctx)
 	require.Error(t, err)
 }

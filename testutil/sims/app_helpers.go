@@ -3,28 +3,15 @@ package sims
 import (
 	"encoding/json"
 	"fmt"
-	// "time"
 
-	// abci "github.com/cometbft/cometbft/abci/types"
-	// cmtjson "github.com/cometbft/cometbft/libs/json"
 	cmtproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	cmttypes "github.com/cometbft/cometbft/types"
-
-	// dbm "github.com/cosmos/cosmos-db"
-
-	// coreheader "cosmossdk.io/core/header"
-	// "cosmossdk.io/depinject"
-	// sdkmath "cosmossdk.io/math"
 
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
-
-	// "github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
-	// "github.com/cosmos/cosmos-sdk/runtime"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
-	// "github.com/cosmos/cosmos-sdk/testutil/mock"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
@@ -64,7 +51,6 @@ func GenesisStateWithValSet(
 	delegations := make([]stakingtypes.Delegation, 0, len(valSet.Validators))
 	sequensers := make([]sequencertypes.Sequencer, 0, len(valSet.Validators))
 
-
 	for id, val := range valSet.Validators {
 		pk, err := cryptocodec.FromCmtPubKeyInterface(val.PubKey)
 		if err != nil {
@@ -77,12 +63,9 @@ func GenesisStateWithValSet(
 		}
 
 		sequenser := sequencertypes.Sequencer{
-			Name:            fmt.Sprintf("sequenser_%s", string(id)),
+			Name:            fmt.Sprintf("sequenser_%d", id),
 			ConsensusPubkey: pkAny,
 		}
-
-		// validators = append(validators, validator)
-		// delegations = append(delegations, stakingtypes.NewDelegation(genAccs[0].GetAddress().String(), sdk.ValAddress(val.Address).String(), sdkmath.LegacyOneDec()))
 		sequensers = append(sequensers, sequenser)
 	}
 

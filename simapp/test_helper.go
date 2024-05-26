@@ -16,15 +16,11 @@ import (
 	"github.com/cosmos/cosmos-sdk/server"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
 
-	//"github.com/cosmos/cosmos-sdk/testutil/mock"
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/cosmos/cosmos-sdk/types/module"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	simtestutil "github.com/decentrio/rollkit-sdk/testutil/sims"
-	// "github.com/cosmos/cosmos-sdk/types/simulation"
-	// vestingtypes "github.com/cosmos/cosmos-sdk/x/auth/vesting/types"
 )
 
 // SetupOptions defines arguments that are passed into `Simapp` constructor.
@@ -86,22 +82,4 @@ func NewSimappWithCustomOptions(t *testing.T, isCheckTx bool, options SetupOptio
 	}
 
 	return app
-}
-
-// RandomGenesisAccounts defines the default RandomGenesisAccountsFn used on the SDK.
-// It creates a slice of BaseAccount, ContinuousVestingAccount and DelayedVestingAccount.
-func RandomGenesisAccounts(simState *module.SimulationState) authtypes.GenesisAccounts {
-	genesisAccs := make(authtypes.GenesisAccounts, len(simState.Accounts))
-	for i, acc := range simState.Accounts {
-		bacc := authtypes.NewBaseAccountWithAddress(acc.Address)
-		genesisAccs[i] = bacc
-		// // Only consider making a vesting account once the initial bonded validator
-		// // set is exhausted due to needing to track DelegatedVesting.
-		// if !(int64(i) > simState.NumBonded && simState.Rand.Intn(100) < 50) {
-		// 	genesisAccs[i] = bacc
-		// 	continue
-		// }
-	}
-
-	return genesisAccs
 }

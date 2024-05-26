@@ -76,19 +76,6 @@ func GenesisStateWithValSet(
 			return nil, fmt.Errorf("failed to create new any: %w", err)
 		}
 
-		// validator := stakingtypes.Validator{
-		// 	OperatorAddress:   sdk.ValAddress(val.Address).String(),
-		// 	ConsensusPubkey:   pkAny,
-		// 	Jailed:            false,
-		// 	Status:            stakingtypes.Bonded,
-		// 	Tokens:            bondAmt,
-		// 	DelegatorShares:   sdkmath.LegacyOneDec(),
-		// 	Description:       stakingtypes.Description{},
-		// 	UnbondingHeight:   int64(0),
-		// 	UnbondingTime:     time.Unix(0, 0).UTC(),
-		// 	Commission:        stakingtypes.NewCommission(sdkmath.LegacyZeroDec(), sdkmath.LegacyZeroDec(), sdkmath.LegacyZeroDec()),
-		// 	MinSelfDelegation: sdkmath.ZeroInt(),
-		// }
 		sequenser := sequencertypes.Sequencer{
 			Name:            fmt.Sprintf("sequenser_%s", string(id)),
 			ConsensusPubkey: pkAny,
@@ -112,17 +99,6 @@ func GenesisStateWithValSet(
 		// add genesis acc tokens to total supply
 		totalSupply = totalSupply.Add(b.Coins...)
 	}
-
-	// for range delegations {
-	// 	// add delegated tokens to total supply
-	// 	totalSupply = totalSupply.Add(sdk.NewCoin(sdk.DefaultBondDenom, bondAmt))
-	// }
-
-	// add bonded amount to bonded pool module account
-	// balances = append(balances, banktypes.Balance{
-	// 	Address: authtypes.NewModuleAddress(stakingtypes.BondedPoolName).String(),
-	// 	Coins:   sdk.Coins{sdk.NewCoin(sdk.DefaultBondDenom, bondAmt)},
-	// })
 
 	// update total supply
 	bankGenesis := banktypes.NewGenesisState(banktypes.DefaultGenesisState().Params, balances, totalSupply, []banktypes.Metadata{}, []banktypes.SendEnabled{})

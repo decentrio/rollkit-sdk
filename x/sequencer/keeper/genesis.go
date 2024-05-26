@@ -10,6 +10,7 @@ import (
 func (k Keeper) InitGenesis(ctx sdk.Context, data *types.GenesisState) []abci.ValidatorUpdate {
 	var seq types.Sequencer
 	if len(data.Sequencers) == 0 {
+		println("go to null sequencer")
 		return []abci.ValidatorUpdate{}
 	}
 

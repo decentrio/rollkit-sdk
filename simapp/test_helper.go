@@ -11,9 +11,7 @@ import (
 
 	"cosmossdk.io/log"
 	sdkmath "cosmossdk.io/math"
-	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
-	"github.com/cosmos/cosmos-sdk/server"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
 
 	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
@@ -28,20 +26,6 @@ type SetupOptions struct {
 	Logger  log.Logger
 	DB      *dbm.MemDB
 	AppOpts servertypes.AppOptions
-}
-
-func setup(withGenesis bool, invCheckPeriod uint) (*SimApp, GenesisState) {
-	db := dbm.NewMemDB()
-
-	appOptions := make(simtestutil.AppOptionsMap, 0)
-	appOptions[flags.FlagHome] = DefaultNodeHome
-	appOptions[server.FlagInvCheckPeriod] = invCheckPeriod
-
-	app := NewSimApp(log.NewNopLogger(), db, nil, true, appOptions)
-	if withGenesis {
-		return app, app.DefaultGenesis()
-	}
-	return app, GenesisState{}
 }
 
 // NewSimappWithCustomOptions initializes a new SimApp with custom options.

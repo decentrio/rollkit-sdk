@@ -25,6 +25,7 @@ require (
 )
 
 require (
+	cosmossdk.io/x/evidence v0.1.1
 	github.com/cosmos/cosmos-db v1.0.2
 	github.com/golang/mock v1.6.0
 	github.com/rollkit/cosmos-sdk-starter v0.0.0-20240508141245-03d41d81903d
@@ -40,6 +41,7 @@ require (
 	github.com/aws/aws-sdk-go v1.44.224 // indirect
 	github.com/benbjohnson/clock v1.3.5 // indirect
 	github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d // indirect
+	github.com/bits-and-blooms/bitset v1.8.0 // indirect
 	github.com/celestiaorg/go-header v0.6.1 // indirect
 	github.com/celestiaorg/go-libp2p-messenger v0.2.0 // indirect
 	github.com/celestiaorg/utils v0.1.0 // indirect

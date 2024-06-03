@@ -55,16 +55,12 @@ func MigrateToRollkitCmd() *cobra.Command {
 				return err
 			}
 
-			rollkitBlock := rollkitBlockFromCometBFTBlock(block, *block.LastCommit, rollkitState.Validators)
-			if err != nil {
-				return err
-			}
-
 			err = rollkitStore.UpdateState(context.Background(), rollkitState)
 			if err != nil {
 				return err
 			}
 
+			rollkitBlock := rollkitBlockFromCometBFTBlock(block, *block.LastCommit, rollkitState.Validators)
 			err = rollkitStore.SaveBlock(context.Background(), &rollkitBlock, &rollkitCommit)
 			if err != nil {
 				return err
@@ -106,6 +102,7 @@ func loadStateAndBlockStore(config *cfg.Config) (*store.BlockStore, state.Store,
 
 	return blockStore, stateStore, nil
 }
+
 func loadRollkitStateStore(rootDir, dbPath string) (rollkitstore.Store, error) {
 	baseKV, err := rollkitstore.NewDefaultKVStore(rootDir, dbPath, "rollkit")
 	if err != nil {

@@ -10,9 +10,9 @@ import (
 
 var LastValidatorSet []stakingtypes.Validator
 
-func (k Keeper) MigrateFromSoveregin(ctx sdk.Context, sequencer types.Sequencer) {
-	// Migrate state from soveregin chain
-	k.SetSequencer(ctx, sequencer)
+func (k Keeper) MigrateFromSoveregin(ctx sdk.Context, sequencer types.Sequencer) error {
+	// Migrate state from sovereign chain
+	return k.Sequencer.Set(ctx, sequencer)
 }
 
 // ChangeoverToConsumer includes the logic that needs to execute during the process of a
@@ -41,7 +41,7 @@ func (k Keeper) ChangeoverToRollup(ctx sdk.Context, lastValidatorSet []stakingty
 	LastValidatorSet = nil
 	k.Logger(ctx).Info("Rollup changeover complete - you are now a rollup chain!")
 
-	err = k.RemoveNextSequencerChangeHeight(ctx)
+	err = k.NextSequencerChangeHeight.Remove(ctx)
 	if err != nil {
 		return nil, err
 	}

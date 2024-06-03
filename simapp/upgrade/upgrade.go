@@ -45,13 +45,19 @@ func CreateUpgradeHandler(mm *module.Manager, configurator module.Configurator, 
 		if err != nil {
 			return nil, err
 		}
-		seqKeeper.SetSequencer(sdkCtx, types.Sequencer{
+		err = seqKeeper.Sequencer.Set(sdkCtx, types.Sequencer{
 			Name:            "sequencer",
 			ConsensusPubkey: pkAny,
 		})
+		if err != nil {
+			return nil, err
+		}
 
 		sequencerkeeper.LastValidatorSet = validatorSet
-		seqKeeper.SetNextSequencerChangeHeight(sdkCtx, sdkCtx.BlockHeight())
+		err = seqKeeper.NextSequencerChangeHeight.Set(sdkCtx, sdkCtx.BlockHeight())
+		if err != nil {
+			return nil, err
+		}
 
 		return mm.RunMigrations(ctx, configurator, fromVM)
 	}

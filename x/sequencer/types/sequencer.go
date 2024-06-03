@@ -20,7 +20,6 @@ func (seq Sequencer) TmConsPublicKey() (cmtprotocrypto.PublicKey, error) {
 		return cmtprotocrypto.PublicKey{}, err
 	}
 	return tmPk, nil
-
 }
 
 // UnpackInterfaces implements UnpackInterfacesMessage.UnpackInterfaces

@@ -4,4 +4,5 @@ Since the x/staking now only manages the governators, it should no longer be mea
 
 Sequencer is the module that manages the actual valset (the sequencer). It's the only module that can make `abci valset update` to rollkit. When initializing a rollkit rollup, we now have the sequencer module init the actual valset (sequencer) instead of the staking module.
 
-This module can potentially be integrated with other sequencing schemes other than the current single sequencer, such as a shared sequencer scheme.
+This module can potentially be integrated with other sequencing schemes (such as shared sequencer) other than the current single sequencer
+

@@ -12,15 +12,11 @@ option go_package = "rollkitsdk/x/sequencer/types";
 // GenesisState defines the gm module's genesis state.
 message GenesisState {
   // params defines all the parameters of the module.
-  Params params = 1 [
-    (gogoproto.nullable) = false,
-    (amino.dont_omitempty) = true
-  ];
+  Params params = 1
+      [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
 
-  repeated Sequencer sequencers = 2 [
-    (gogoproto.nullable) = false,
-    (amino.dont_omitempty) = true
-  ];
+  repeated Sequencer sequencers = 2
+      [ (gogoproto.nullable) = false, (amino.dont_omitempty) = true ];
 }
 
 // Sequencer defines a sequence of instructions to be executed.
@@ -28,6 +24,8 @@ message Sequencer {
   // name is the human-readable name of the sequence.
   string name = 1;
 
-  // consensus_pubkey is the consensus public key of the sequencer, as a Protobuf Any.
-  google.protobuf.Any consensus_pubkey = 2 [(cosmos_proto.accepts_interface) = "cosmos.crypto.PubKey"];
+  // consensus_pubkey is the consensus public key of the sequencer, as a
+  // Protobuf Any.
+  google.protobuf.Any consensus_pubkey = 2
+      [ (cosmos_proto.accepts_interface) = "cosmos.crypto.PubKey" ];
 }

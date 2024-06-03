@@ -605,7 +605,9 @@ func (app *SimApp) InitChainer(ctx sdk.Context, req *abci.RequestInitChain) (*ab
 	if err := json.Unmarshal(req.AppStateBytes, &genesisState); err != nil {
 		panic(err)
 	}
-	app.UpgradeKeeper.SetModuleVersionMap(ctx, app.ModuleManager.GetVersionMap())
+	if err := app.UpgradeKeeper.SetModuleVersionMap(ctx, app.ModuleManager.GetVersionMap()); err != nil {
+		panic(err)
+	}
 	return app.ModuleManager.InitGenesis(ctx, app.appCodec, genesisState)
 }
 
@@ -736,6 +738,10 @@ func (app *SimApp) RegisterTendermintService(clientCtx client.Context) {
 
 func (app *SimApp) RegisterNodeService(clientCtx client.Context, cfg config.Config) {
 	nodeservice.RegisterNodeService(clientCtx, app.GRPCQueryRouter(), cfg)
+}
+
+func (app *SimApp) DefaultGenesisState(cdc codec.JSONCodec) map[string]json.RawMessage {
+	return app.BasicModuleManager.DefaultGenesis(cdc)
 }
 
 // GetMaccPerms returns a copy of the module account permissions

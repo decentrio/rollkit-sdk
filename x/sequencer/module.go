@@ -22,7 +22,6 @@ import (
 var (
 	_ module.AppModuleBasic  = AppModuleBasic{}
 	_ appmodule.AppModule    = AppModule{}
-	_ module.HasServices     = AppModule{}
 	_ module.HasABCIGenesis  = AppModule{}
 	_ module.HasABCIEndBlock = AppModule{}
 )
@@ -81,7 +80,7 @@ func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, data json.
 // EndBlock implements the AppModule interface
 func (am AppModule) EndBlock(ctx context.Context) ([]abci.ValidatorUpdate, error) {
 	sdkCtx := sdk.UnwrapSDKContext(ctx)
-	nextChangeSequencerHeight, err := am.keeper.NextSequencerChangeHeight.Get(ctx)
+	nextChangeSequencerHeight, err := am.keeper.GetNextSequencerChangeHeight(sdkCtx)
 	if sdkCtx.BlockHeight() != nextChangeSequencerHeight || err != nil {
 		return []abci.ValidatorUpdate{}, nil
 	}
@@ -112,11 +111,6 @@ func (AppModule) RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {
 // RegisterInterfaces registers the module's interface types
 func (AppModule) RegisterInterfaces(registry cdctypes.InterfaceRegistry) {
 	types.RegisterInterfaces(registry)
-}
-
-// RegisterServices registers module services.
-func (am AppModule) RegisterServices(cfg module.Configurator) {
-	types.RegisterMsgServer(cfg.MsgServer(), keeper.NewMsgServerImpl(am.keeper))
 }
 
 // RegisterGRPCGatewayRoutes registers the gRPC Gateway routes for the staking module.

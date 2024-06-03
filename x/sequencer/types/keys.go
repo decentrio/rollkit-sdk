@@ -20,6 +20,4 @@ var (
 
 	// Keys for store next sequencer change height
 	NextSequencerChangeHeight = []byte{0x13}
-
-	ParamsKey = []byte{0x14}
 )

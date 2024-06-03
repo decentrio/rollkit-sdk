@@ -102,7 +102,6 @@ func loadStateAndBlockStore(config *cfg.Config) (*store.BlockStore, state.Store,
 
 	return blockStore, stateStore, nil
 }
-
 func loadRollkitStateStore(rootDir, dbPath string) (rollkitstore.Store, error) {
 	baseKV, err := rollkitstore.NewDefaultKVStore(rootDir, dbPath, "rollkit")
 	if err != nil {

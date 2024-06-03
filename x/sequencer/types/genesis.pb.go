@@ -84,8 +84,7 @@ func (m *GenesisState) GetSequencers() []Sequencer {
 type Sequencer struct {
 	// name is the human-readable name of the sequence.
 	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	// consensus_pubkey is the consensus public key of the sequencer, as a
-	// Protobuf Any.
+	// consensus_pubkey is the consensus public key of the sequencer, as a Protobuf Any.
 	ConsensusPubkey *types.Any `protobuf:"bytes,2,opt,name=consensus_pubkey,json=consensusPubkey,proto3" json:"consensus_pubkey,omitempty"`
 }
 

@@ -166,7 +166,7 @@ func (app *SimApp) prepForZeroHeightGenesis(ctx sdk.Context, jailAllowedAddrs []
 	/* Handle staking state. */
 
 	// iterate through redelegations, reset creation height
-	err = app.StakingKeeper.IterateRedelegations(ctx, func(_ int64, red stakingtypes.Redelegation) (stop bool) {
+	app.StakingKeeper.IterateRedelegations(ctx, func(_ int64, red stakingtypes.Redelegation) (stop bool) {
 		for i := range red.Entries {
 			red.Entries[i].CreationHeight = 0
 		}
@@ -176,12 +176,9 @@ func (app *SimApp) prepForZeroHeightGenesis(ctx sdk.Context, jailAllowedAddrs []
 		}
 		return false
 	})
-	if err != nil {
-		panic(fmt.Errorf("error while iterating redelegations: %w", err))
-	}
 
 	// iterate through unbonding delegations, reset creation height
-	err = app.StakingKeeper.IterateUnbondingDelegations(ctx, func(_ int64, ubd stakingtypes.UnbondingDelegation) (stop bool) {
+	app.StakingKeeper.IterateUnbondingDelegations(ctx, func(_ int64, ubd stakingtypes.UnbondingDelegation) (stop bool) {
 		for i := range ubd.Entries {
 			ubd.Entries[i].CreationHeight = 0
 		}
@@ -191,9 +188,6 @@ func (app *SimApp) prepForZeroHeightGenesis(ctx sdk.Context, jailAllowedAddrs []
 		}
 		return false
 	})
-	if err != nil {
-		panic(fmt.Errorf("error while iterating unbonding delegations: %w", err))
-	}
 
 	// Iterate through validators by power descending, reset bond heights, and
 	// update bond intra-tx counters.
@@ -213,9 +207,7 @@ func (app *SimApp) prepForZeroHeightGenesis(ctx sdk.Context, jailAllowedAddrs []
 			validator.Jailed = true
 		}
 
-		if err := app.StakingKeeper.SetValidator(ctx, validator); err != nil {
-			panic(err)
-		}
+		app.StakingKeeper.SetValidator(ctx, validator)
 		counter++
 	}
 

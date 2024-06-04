@@ -4,9 +4,16 @@ import (
 	"context"
 	"encoding/json"
 
+	modulev1 "cosmossdk.io/api/cosmos/staking/module/v1"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+
 	"cosmossdk.io/core/appmodule"
+	"cosmossdk.io/core/store"
+	"cosmossdk.io/depinject"
 	abci "github.com/cometbft/cometbft/abci/types"
+	"github.com/cosmos/cosmos-sdk/runtime"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/cosmos/cosmos-sdk/x/staking/exported"
 	"github.com/decentrio/rollkit-sdk/x/staking/keeper"
 
@@ -64,4 +71,48 @@ func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, data json.
 	var genesisState types.GenesisState
 	cdc.MustUnmarshalJSON(data, &genesisState)
 	_ = am.keeper.InitGenesis(ctx, &genesisState)
+}
+
+// start depinject implementation
+type ModuleInputs struct {
+	depinject.In
+
+	Config                *modulev1.Module
+	ValidatorAddressCodec runtime.ValidatorAddressCodec
+	ConsensusAddressCodec runtime.ConsensusAddressCodec
+	AccountKeeper         types.AccountKeeper
+	BankKeeper            types.BankKeeper
+	Cdc                   codec.Codec
+	StoreService          store.KVStoreService
+
+	// LegacySubspace is used solely for migration of x/params managed parameters
+	LegacySubspace exported.Subspace `optional:"true"`
+}
+
+// Dependency Injection Outputs
+type ModuleOutputs struct {
+	depinject.Out
+
+	StakingKeeper *keeper.Keeper
+	Module        appmodule.AppModule
+}
+
+func ProvideModule(in ModuleInputs) ModuleOutputs {
+	// default to governance authority if not provided
+	authority := authtypes.NewModuleAddress(govtypes.ModuleName)
+	if in.Config.Authority != "" {
+		authority = authtypes.NewModuleAddressOrBech32Address(in.Config.Authority)
+	}
+
+	k := keeper.NewKeeper(
+		in.Cdc,
+		in.StoreService,
+		in.AccountKeeper,
+		in.BankKeeper,
+		authority.String(),
+		in.ValidatorAddressCodec,
+		in.ConsensusAddressCodec,
+	)
+	m := NewAppModule(in.Cdc, k, in.AccountKeeper, in.BankKeeper, in.LegacySubspace)
+	return ModuleOutputs{StakingKeeper: &k, Module: m}
 }

@@ -5,7 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 
+	modulev1 "cosmossdk.io/api/cosmos/staking/module/v1"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+
 	"cosmossdk.io/core/appmodule"
+	"cosmossdk.io/core/store"
+	"cosmossdk.io/depinject"
 	abci "github.com/cometbft/cometbft/abci/types"
 	"github.com/cosmos/cosmos-sdk/client"
 	cdctypes "github.com/cosmos/cosmos-sdk/codec/types"
@@ -146,4 +152,39 @@ func (AppModule) ValidateGenesis(cdc codec.JSONCodec, config client.TxEncodingCo
 	}
 
 	return nil
+}
+
+// start depinject implementation
+type ModuleInputs struct {
+	depinject.In
+
+	Config        *modulev1.Module
+	AccountKeeper types.AccountKeeper
+	Cdc           codec.Codec
+	StoreService  store.KVStoreService
+}
+
+// Dependency Injection Outputs
+type ModuleOutputs struct {
+	depinject.Out
+
+	SequencerKeeper *keeper.Keeper
+	Module          appmodule.AppModule
+}
+
+func ProvideModule(in ModuleInputs) ModuleOutputs {
+	// default to governance authority if not provided
+	authority := authtypes.NewModuleAddress(govtypes.ModuleName)
+	if in.Config.Authority != "" {
+		authority = authtypes.NewModuleAddressOrBech32Address(in.Config.Authority)
+	}
+
+	k := keeper.NewKeeper(
+		in.Cdc,
+		in.StoreService,
+		in.AccountKeeper,
+		authority.String(),
+	)
+	m := NewAppModule(in.Cdc, k)
+	return ModuleOutputs{SequencerKeeper: &k, Module: m}
 }

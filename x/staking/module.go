@@ -3,9 +3,12 @@ package staking
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"sort"
 
 	modulev1 "cosmossdk.io/api/cosmos/staking/module/v1"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+	"gopkg.in/typ.v4/maps"
 
 	"cosmossdk.io/core/appmodule"
 	"cosmossdk.io/core/store"
@@ -74,6 +77,14 @@ func (am AppModule) InitGenesis(ctx sdk.Context, cdc codec.JSONCodec, data json.
 }
 
 // start depinject implementation
+func init() {
+	appmodule.Register(
+		&modulev1.Module{},
+		appmodule.Provide(ProvideModule),
+		appmodule.Invoke(InvokeSetStakingHooks),
+	)
+}
+
 type ModuleInputs struct {
 	depinject.In
 
@@ -113,6 +124,46 @@ func ProvideModule(in ModuleInputs) ModuleOutputs {
 		in.ValidatorAddressCodec,
 		in.ConsensusAddressCodec,
 	)
+
 	m := NewAppModule(in.Cdc, k, in.AccountKeeper, in.BankKeeper, in.LegacySubspace)
 	return ModuleOutputs{StakingKeeper: &k, Module: m}
+}
+
+func InvokeSetStakingHooks(
+	config *modulev1.Module,
+	keeper *keeper.Keeper,
+	stakingHooks map[string]types.StakingHooksWrapper,
+) error {
+	// all arguments to invokers are optional
+	if keeper == nil || config == nil {
+		return nil
+	}
+
+	modNames := maps.Keys(stakingHooks)
+	order := config.HooksOrder
+	if len(order) == 0 {
+		order = modNames
+		sort.Strings(order)
+	}
+
+	if len(order) != len(modNames) {
+		return fmt.Errorf("len(hooks_order: %v) != len(hooks modules: %v)", order, modNames)
+	}
+
+	if len(modNames) == 0 {
+		return nil
+	}
+
+	var multiHooks types.MultiStakingHooks
+	for _, modName := range order {
+		hook, ok := stakingHooks[modName]
+		if !ok {
+			return fmt.Errorf("can't find staking hooks for module %s", modName)
+		}
+
+		multiHooks = append(multiHooks, hook)
+	}
+
+	keeper.SetHooks(multiHooks)
+	return nil
 }

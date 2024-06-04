@@ -1,4 +1,4 @@
-//go:build !appv1
+//go:build !app_v1
 
 package cmd
 

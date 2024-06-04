@@ -188,6 +188,7 @@ func NewSimApp(
 		&app.NFTKeeper,
 		&app.ConsensusParamsKeeper,
 		&app.CircuitBreakerKeeper,
+		&app.SequencerKeeper,
 	); err != nil {
 		panic(err)
 	}

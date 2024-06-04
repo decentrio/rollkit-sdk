@@ -1,9 +1,9 @@
+//go:build !app_v1
+
 package simapp
 
 import (
 	"time"
-
-	"google.golang.org/protobuf/types/known/durationpb"
 
 	runtimev1alpha1 "cosmossdk.io/api/cosmos/app/runtime/v1alpha1"
 	appv1alpha1 "cosmossdk.io/api/cosmos/app/v1alpha1"
@@ -39,6 +39,8 @@ import (
 	_ "cosmossdk.io/x/nft/module" // import for side-effects
 	_ "cosmossdk.io/x/upgrade"    // import for side-effects
 	upgradetypes "cosmossdk.io/x/upgrade/types"
+	sequencerv1 "github.com/decentrio/rollkit-sdk/api/rollkitsdk/sequencer/module"
+	"google.golang.org/protobuf/types/known/durationpb"
 
 	"github.com/cosmos/cosmos-sdk/runtime"
 	"github.com/cosmos/cosmos-sdk/types/module"
@@ -70,8 +72,11 @@ import (
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
 	_ "github.com/cosmos/cosmos-sdk/x/slashing" // import for side-effects
 	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
-	_ "github.com/cosmos/cosmos-sdk/x/staking" // import for side-effects
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+	_ "github.com/decentrio/rollkit-sdk/x/staking" // import for side-effects
+
+	_ "github.com/decentrio/rollkit-sdk/x/sequencer" // import for side-effects
+	sequencertypes "github.com/decentrio/rollkit-sdk/x/sequencer/types"
 )
 
 var (
@@ -124,6 +129,7 @@ var (
 					EndBlockers: []string{
 						crisistypes.ModuleName,
 						govtypes.ModuleName,
+						sequencertypes.ModuleName,
 						stakingtypes.ModuleName,
 						feegrant.ModuleName,
 						group.ModuleName,
@@ -141,6 +147,7 @@ var (
 						authtypes.ModuleName,
 						banktypes.ModuleName,
 						distrtypes.ModuleName,
+						sequencertypes.ModuleName,
 						stakingtypes.ModuleName,
 						slashingtypes.ModuleName,
 						govtypes.ModuleName,
@@ -259,6 +266,10 @@ var (
 			{
 				Name:   circuittypes.ModuleName,
 				Config: appconfig.WrapAny(&circuitmodulev1.Module{}),
+			},
+			{
+				Name:   sequencertypes.ModuleName,
+				Config: appconfig.WrapAny(&sequencerv1.Module{}),
 			},
 		},
 	}),

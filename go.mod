@@ -29,6 +29,7 @@ require (
 	github.com/cosmos/cosmos-db v1.0.2
 	github.com/rollkit/cosmos-sdk-starter v0.0.0-20240508141245-03d41d81903d
 	github.com/rollkit/rollkit v0.13.1
+	gopkg.in/typ.v4 v4.3.0
 )
 
 require (

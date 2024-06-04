@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 
-	modulev1 "cosmossdk.io/api/cosmos/staking/module/v1"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+	modulev1 "github.com/decentrio/rollkit-sdk/api/rollkitsdk/sequencer/module"
 
 	"cosmossdk.io/core/appmodule"
 	"cosmossdk.io/core/store"
@@ -155,6 +155,14 @@ func (AppModule) ValidateGenesis(cdc codec.JSONCodec, config client.TxEncodingCo
 }
 
 // start depinject implementation
+
+func init() {
+	appmodule.Register(
+		&modulev1.Module{},
+		appmodule.Provide(ProvideModule),
+	)
+}
+
 type ModuleInputs struct {
 	depinject.In
 
@@ -168,7 +176,7 @@ type ModuleInputs struct {
 type ModuleOutputs struct {
 	depinject.Out
 
-	SequencerKeeper *keeper.Keeper
+	SequencerKeeper keeper.Keeper
 	Module          appmodule.AppModule
 }
 
@@ -186,5 +194,5 @@ func ProvideModule(in ModuleInputs) ModuleOutputs {
 		authority.String(),
 	)
 	m := NewAppModule(in.Cdc, k)
-	return ModuleOutputs{SequencerKeeper: &k, Module: m}
+	return ModuleOutputs{SequencerKeeper: k, Module: m}
 }

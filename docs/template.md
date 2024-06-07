@@ -15,8 +15,8 @@ List of modules from the cosmos-sdk that should be removed for a rollkit applica
 
 Besides the removal of some sdk modules, we also make the following changes to the app:
 
-- Wrap `x/staking` module to modify it without breaking related modules. The goal is to simplify the module, transforming it to a `pseudo-staking` module that can still incoperate with other sdk modules. Read this [doc](../x/staking/README.md) for more details
+- Wrap `x/staking` module to modify it without breaking related modules. The goal is to simplify the module, transforming it to a `pseudo-staking` module that can still incoperate with other sdk modules. Read this [doc](./modules/staking.md) for more details
 
-- Add module `x/sequencer` to manage the sequencer as `x/staking` no longer has the role of managing the underlying valset(equivalent to the sequencer). Read this [doc](../x/sequencer/README.md) for more details
+- Add module `x/sequencer` to manage the sequencer as `x/staking` no longer has the role of managing the underlying valset(equivalent to the sequencer). Read this [doc](./modules/sequencer.md) for more details
 
 The default app is designed to be a very simple rollkit application without any flavors. It has the very same functionalities as a cosmos-sdk app but with PoS related features removed (slashing and PoS incentives). Though, it still has a `staking` app with empty incentive settings because we want to provide the base for staking rollkit apps to build ontop. Even if the app doesn't want `staking` feature, the `staking` app still serves as the base for gov logic which is still very useful.

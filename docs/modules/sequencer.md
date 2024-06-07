@@ -1,4 +1,8 @@
-# Sequencer module
+---
+parent: Modules
+---
+
+# Sequencer
 
 Since the x/staking now only manages the governators, it should no longer be meant to manage the actual valset. This means we should have another module to handle said task (separation of concerns) so that we still keep abci semantics intact (enable abci valset update for rollkit).
 

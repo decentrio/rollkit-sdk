@@ -1,3 +1,7 @@
+---
+parent: Instructions
+---
+
 # Run the demo RappDK rollup
 
 

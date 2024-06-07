@@ -1,3 +1,7 @@
+---
+parent: Instructions
+---
+
 # Integrate the RappDK to your chain
 
 This guide will teach you how to integrate RappDK to your cometBFT chain.

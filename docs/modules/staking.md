@@ -1,4 +1,8 @@
-# Staking module
+---
+parent: Modules
+---
+
+# Staking
 
 The staking module in cosmos sdk is an implementation of cosmos PoS protocol. It is one of the most complex modules in the SDK which contains many logic:
 

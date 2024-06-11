@@ -1,1 +1,3 @@
-remote_theme: pmarsceill/just-the-docs
+remote_theme: just-the-docs/just-the-docs
+title: Rollkit SDK Documentation
+url: https://doc.decentrio.ventures/rollkit-sdk

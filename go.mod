@@ -27,6 +27,7 @@ require (
 require (
 	cosmossdk.io/x/evidence v0.1.1
 	github.com/cosmos/cosmos-db v1.0.2
+	github.com/golang/mock v1.6.0
 	github.com/rollkit/cosmos-sdk-starter v0.0.0-20240508141245-03d41d81903d
 	github.com/rollkit/rollkit v0.13.1
 	gopkg.in/typ.v4 v4.3.0
@@ -64,7 +65,6 @@ require (
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
-	github.com/golang/mock v1.6.0 // indirect
 	github.com/google/flatbuffers v1.12.1 // indirect
 	github.com/google/gopacket v1.1.19 // indirect
 	github.com/google/pprof v0.0.0-20240207164012-fb44976bdcd5 // indirect

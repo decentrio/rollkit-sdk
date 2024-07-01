@@ -1,3 +1,5 @@
+//go:build !app_notoken
+
 package simapp
 
 import (

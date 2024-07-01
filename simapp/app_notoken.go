@@ -1,26 +1,26 @@
-//go:build app_v2
+//go:build app_notoken
 
 package simapp
 
 import (
+	"encoding/json"
 	"io"
 	"os"
 	"path/filepath"
 
+	cmtproto "github.com/cometbft/cometbft/proto/tendermint/types"
 	dbm "github.com/cosmos/cosmos-db"
-	rollkitupgrade "github.com/decentrio/rollkit-sdk/simapp/upgrade"
 	sequencerkeeper "github.com/decentrio/rollkit-sdk/x/sequencer/keeper"
-	rollkitstakingkeeper "github.com/decentrio/rollkit-sdk/x/staking/keeper"
+
+	"cosmossdk.io/log"
 
 	"cosmossdk.io/depinject"
-	"cosmossdk.io/log"
 	storetypes "cosmossdk.io/store/types"
 	circuitkeeper "cosmossdk.io/x/circuit/keeper"
 	evidencekeeper "cosmossdk.io/x/evidence/keeper"
 	feegrantkeeper "cosmossdk.io/x/feegrant/keeper"
 	nftkeeper "cosmossdk.io/x/nft/keeper"
 	upgradekeeper "cosmossdk.io/x/upgrade/keeper"
-	upgradetypes "cosmossdk.io/x/upgrade/types"
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/client"
@@ -32,6 +32,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/server/config"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
 	testdata_pulsar "github.com/cosmos/cosmos-sdk/testutil/testdata/testpb"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	"github.com/cosmos/cosmos-sdk/x/auth"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
@@ -71,7 +72,6 @@ type SimApp struct {
 	// keepers
 	AccountKeeper         authkeeper.AccountKeeper
 	BankKeeper            bankkeeper.Keeper
-	StakingKeeper         *rollkitstakingkeeper.Keeper
 	SlashingKeeper        slashingkeeper.Keeper
 	MintKeeper            mintkeeper.Keeper
 	DistrKeeper           distrkeeper.Keeper
@@ -173,9 +173,7 @@ func NewSimApp(
 		&app.interfaceRegistry,
 		&app.AccountKeeper,
 		&app.BankKeeper,
-		&app.StakingKeeper,
 		&app.SlashingKeeper,
-		&app.MintKeeper,
 		&app.DistrKeeper,
 		&app.GovKeeper,
 		&app.CrisisKeeper,
@@ -236,9 +234,6 @@ func NewSimApp(
 	/****  Module Options ****/
 
 	app.ModuleManager.RegisterInvariants(app.CrisisKeeper)
-
-	// RegisterUpgradeHandlers is used for registering any on-chain upgrades.
-	app.RegisterUpgradeHandlers()
 
 	// add test gRPC service for testing gRPC queries in isolation
 	testdata_pulsar.RegisterQueryServer(app.GRPCQueryRouter(), testdata_pulsar.QueryImpl{})
@@ -373,19 +368,67 @@ func BlockedAddresses() map[string]bool {
 	return result
 }
 
-func (app SimApp) RegisterUpgradeHandlers() {
-	app.UpgradeKeeper.SetUpgradeHandler(
-		rollkitupgrade.Name,
-		rollkitupgrade.CreateUpgradeHandler(app.ModuleManager, app.Configurator(), app.SequencerKeeper, app.StakingKeeper.Keeper),
-	)
+// ExportAppStateAndValidators exports the state of the application for a genesis
+// file.
+func (app *SimApp) ExportAppStateAndValidators(forZeroHeight bool, jailAllowedAddrs, modulesToExport []string) (servertypes.ExportedApp, error) {
+	// as if they could withdraw from the start of the next block
+	ctx := app.NewContextLegacy(true, cmtproto.Header{Height: app.LastBlockHeight()})
 
-	upgradeInfo, err := app.UpgradeKeeper.ReadUpgradeInfoFromDisk()
+	// We export at last height + 1, because that's the height at which
+	// CometBFT will start InitChain.
+	height := app.LastBlockHeight() + 1
+	if forZeroHeight {
+		height = 0
+		app.prepForZeroHeightGenesis(ctx, jailAllowedAddrs)
+	}
+
+	genState, err := app.ModuleManager.ExportGenesisForModules(ctx, app.appCodec, modulesToExport)
 	if err != nil {
-		panic(err)
+		return servertypes.ExportedApp{}, err
 	}
 
-	if upgradeInfo.Name == rollkitupgrade.Name && !app.UpgradeKeeper.IsSkipHeight(upgradeInfo.Height) {
-		// configure store loader that checks if version == upgradeHeight and applies store upgrades
-		app.SetStoreLoader(upgradetypes.UpgradeStoreLoader(upgradeInfo.Height, &rollkitupgrade.StoreUpgrades))
+	appState, err := json.MarshalIndent(genState, "", "  ")
+	if err != nil {
+		return servertypes.ExportedApp{}, err
 	}
+
+	return servertypes.ExportedApp{
+		AppState:        appState,
+		Height:          height,
+		ConsensusParams: app.BaseApp.GetConsensusParams(ctx),
+	}, err
+}
+
+// only for testing purposes
+// prepare for fresh start at zero height
+// NOTE zero height genesis is a temporary feature which will be deprecated
+//
+//	in favor of export at a block height
+func (app *SimApp) prepForZeroHeightGenesis(ctx sdk.Context, jailAllowedAddrs []string) {
+
+	allowedAddrsMap := make(map[string]bool)
+
+	for _, addr := range jailAllowedAddrs {
+		_, err := sdk.ValAddressFromBech32(addr)
+		if err != nil {
+			panic(err)
+		}
+		allowedAddrsMap[addr] = true
+	}
+
+	/* Just to be safe, assert the invariants on current state. */
+	app.CrisisKeeper.AssertInvariants(ctx)
+
+	// clear validator slash events
+	app.DistrKeeper.DeleteAllValidatorSlashEvents(ctx)
+
+	// clear validator historical rewards
+	app.DistrKeeper.DeleteAllValidatorHistoricalRewards(ctx)
+
+	// set context height to zero
+	height := ctx.BlockHeight()
+	ctx = ctx.WithBlockHeight(0)
+
+	// reset context height
+	ctx = ctx.WithBlockHeight(height)
 }

@@ -28,7 +28,7 @@ require (
 	cosmossdk.io/x/evidence v0.1.1
 	github.com/cosmos/cosmos-db v1.0.2
 	github.com/rollkit/cosmos-sdk-starter v0.0.0-20240508141245-03d41d81903d
-	github.com/rollkit/rollkit v0.13.1
+	github.com/rollkit/rollkit v0.13.5
 	gopkg.in/typ.v4 v4.3.0
 )
 
@@ -305,6 +305,5 @@ require (
 )
 
 replace (
-	github.com/rollkit/rollkit => github.com/decentrio/rollkit v0.0.0-20240516071120-d40857416a55
-	github.com/syndtr/goleveldb => github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
+q	github.com/syndtr/goleveldb => github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
 )

@@ -1,6 +1,8 @@
 package types
 
 const (
+	DefaultHistoricalEntries uint32 = 10000
+
 	// ModuleName is the name of the sequencer module
 	ModuleName = "sequencer"
 
@@ -12,6 +14,7 @@ const (
 )
 
 var (
+
 	// Keys for store sequencer cons address
 	SequencerConsAddrKey = []byte{0x11}
 

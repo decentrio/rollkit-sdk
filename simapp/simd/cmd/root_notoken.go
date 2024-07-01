@@ -1,4 +1,4 @@
-//go:build !app_notoken
+//go:build app_notoken
 
 package cmd
 

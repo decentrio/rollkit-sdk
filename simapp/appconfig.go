@@ -14,7 +14,6 @@ import (
 	consensusmodulev1 "cosmossdk.io/api/cosmos/consensus/module/v1"
 	crisismodulev1 "cosmossdk.io/api/cosmos/crisis/module/v1"
 	distrmodulev1 "cosmossdk.io/api/cosmos/distribution/module/v1"
-	evidencemodulev1 "cosmossdk.io/api/cosmos/evidence/module/v1"
 	feegrantmodulev1 "cosmossdk.io/api/cosmos/feegrant/module/v1"
 	genutilmodulev1 "cosmossdk.io/api/cosmos/genutil/module/v1"
 	govmodulev1 "cosmossdk.io/api/cosmos/gov/module/v1"
@@ -22,7 +21,6 @@ import (
 	mintmodulev1 "cosmossdk.io/api/cosmos/mint/module/v1"
 	nftmodulev1 "cosmossdk.io/api/cosmos/nft/module/v1"
 	paramsmodulev1 "cosmossdk.io/api/cosmos/params/module/v1"
-	slashingmodulev1 "cosmossdk.io/api/cosmos/slashing/module/v1"
 	stakingmodulev1 "cosmossdk.io/api/cosmos/staking/module/v1"
 	txconfigv1 "cosmossdk.io/api/cosmos/tx/config/v1"
 	upgrademodulev1 "cosmossdk.io/api/cosmos/upgrade/module/v1"
@@ -31,8 +29,6 @@ import (
 	"cosmossdk.io/depinject"
 	_ "cosmossdk.io/x/circuit" // import for side-effects
 	circuittypes "cosmossdk.io/x/circuit/types"
-	_ "cosmossdk.io/x/evidence" // import for side-effects
-	evidencetypes "cosmossdk.io/x/evidence/types"
 	"cosmossdk.io/x/feegrant"
 	_ "cosmossdk.io/x/feegrant/module" // import for side-effects
 	"cosmossdk.io/x/nft"
@@ -70,8 +66,6 @@ import (
 	_ "github.com/cosmos/cosmos-sdk/x/params" // import for side-effects
 	paramsclient "github.com/cosmos/cosmos-sdk/x/params/client"
 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
-	_ "github.com/cosmos/cosmos-sdk/x/slashing" // import for side-effects
-	slashingtypes "github.com/cosmos/cosmos-sdk/x/slashing/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	_ "github.com/decentrio/rollkit-sdk/x/staking" // import for side-effects
 
@@ -121,8 +115,6 @@ var (
 					BeginBlockers: []string{
 						minttypes.ModuleName,
 						distrtypes.ModuleName,
-						slashingtypes.ModuleName,
-						evidencetypes.ModuleName,
 						stakingtypes.ModuleName,
 						authz.ModuleName,
 					},
@@ -149,12 +141,10 @@ var (
 						distrtypes.ModuleName,
 						sequencertypes.ModuleName,
 						stakingtypes.ModuleName,
-						slashingtypes.ModuleName,
 						govtypes.ModuleName,
 						minttypes.ModuleName,
 						crisistypes.ModuleName,
 						genutiltypes.ModuleName,
-						evidencetypes.ModuleName,
 						authz.ModuleName,
 						feegrant.ModuleName,
 						nft.ModuleName,
@@ -201,10 +191,6 @@ var (
 				}),
 			},
 			{
-				Name:   slashingtypes.ModuleName,
-				Config: appconfig.WrapAny(&slashingmodulev1.Module{}),
-			},
-			{
 				Name:   paramstypes.ModuleName,
 				Config: appconfig.WrapAny(&paramsmodulev1.Module{}),
 			},
@@ -227,10 +213,6 @@ var (
 			{
 				Name:   distrtypes.ModuleName,
 				Config: appconfig.WrapAny(&distrmodulev1.Module{}),
-			},
-			{
-				Name:   evidencetypes.ModuleName,
-				Config: appconfig.WrapAny(&evidencemodulev1.Module{}),
 			},
 			{
 				Name:   minttypes.ModuleName,

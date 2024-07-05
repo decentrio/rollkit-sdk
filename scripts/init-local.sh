@@ -81,9 +81,9 @@ simd genesis collect-gentxs
 
 # copy centralized sequencer address into genesis.json
 # Note: validator and sequencer are used interchangeably here
-# ADDRESS=$(jq -r '.address' ~/.simapp/config/priv_validator_key.json)
-# PUB_KEY=$(jq -r '.pub_key' ~/.simapp/config/priv_validator_key.json)
-# jq --argjson pubKey "$PUB_KEY" '.consensus["validators"]=[{"address": "'$ADDRESS'", "pub_key": $pubKey, "power": "1000", "name": "Rollkit Sequencer"}]' ~/.simapp/config/genesis.json > temp.json && mv temp.json ~/.simapp/config/genesis.json
+ADDRESS=$(jq -r '.address' ~/.simapp/config/priv_validator_key.json)
+PUB_KEY=$(jq -r '.pub_key' ~/.simapp/config/priv_validator_key.json)
+jq --argjson pubKey "$PUB_KEY" '.consensus["validators"]=[{"address": "'$ADDRESS'", "pub_key": $pubKey, "power": "1", "name": "Rollkit Sequencer"}]' ~/.simapp/config/genesis.json > temp.json && mv temp.json ~/.simapp/config/genesis.json
 
 
 PUB_KEY=$(jq -r '.pub_key .value' ~/.simapp/config/priv_validator_key.json)
